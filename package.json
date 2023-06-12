@@ -1,6 +1,6 @@
 {
   "name": "nest-learn",
-  "version": "0.0.1",
+  "version": "1.0.0.0",
   "description": "",
   "author": "",
   "private": true,
@@ -23,6 +23,8 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "express-session": "^1.17.3",
+    "hbs": "^4.2.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"
   },

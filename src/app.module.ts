@@ -1,26 +1,27 @@
-/*
- * @Description:
- * @Anthor: Telliex
- * @Date: 2023-06-09 10:34:13
- * @LastEditors: Telliex
- * @LastEditTime: 2023-06-11 16:29:21
- */
-/*
- * @Description:
- * @Anthor: Telliex
- * @Date: 2023-06-09 10:34:13
- * @LastEditors: Telliex
- * @LastEditTime: 2023-06-10 10:54:34
- */
-import { Module } from '@nestjs/common';
+import {
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { MenuModule } from './menu/menu.module';
+
+import { InitMiddleware } from './middleware/init.middleware';
 
 @Module({
   imports: [UserModule, MenuModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(InitMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+    // .apply(NewsMiddleware)
+    // .forRoutes({ path: 'news', method: RequestMethod.ALL });
+  }
+}
