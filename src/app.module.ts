@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Anthor: Telliex
+ * @Date: 2023-06-12 22:27:23
+ * @LastEditors: Telliex
+ * @LastEditTime: 2023-06-13 00:54:46
+ */
 import {
   Module,
   NestModule,
@@ -10,11 +17,11 @@ import { UserModule } from './user/user.module';
 import { MenuModule } from './menu/menu.module';
 
 import { InitMiddleware } from './middleware/init.middleware';
-import { HealthController } from './health/health.controller';
+import { KeepaliveController } from './keepalive/keepalive.controller';
 
 @Module({
   imports: [UserModule, MenuModule],
-  controllers: [AppController, HealthController],
+  controllers: [AppController, KeepaliveController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {

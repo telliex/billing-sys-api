@@ -1,16 +1,16 @@
 /*
  * @Description:
  * @Anthor: Telliex
- * @Date: 2023-06-13 00:32:54
+ * @Date: 2023-06-13 00:53:59
  * @LastEditors: Telliex
- * @LastEditTime: 2023-06-13 00:38:10
+ * @LastEditTime: 2023-06-13 00:54:26
  */
 import { Controller, Get } from '@nestjs/common';
 
-@Controller('health')
-export class HealthController {
+@Controller('keepalive')
+export class KeepaliveController {
   @Get()
-  checkHealth() {
+  keepalive() {
     return { status: 'ok' };
   }
 }
