@@ -10,10 +10,11 @@ import { UserModule } from './user/user.module';
 import { MenuModule } from './menu/menu.module';
 
 import { InitMiddleware } from './middleware/init.middleware';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [UserModule, MenuModule],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
