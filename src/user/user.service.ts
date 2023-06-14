@@ -6,7 +6,7 @@
  * @LastEditTime: 2023-06-11 14:34:15
  */
 import { NotFoundException, Injectable } from '@nestjs/common';
-import { User } from './entities/user.entity';
+import { User } from '../entity/user.entity';
 @Injectable()
 export class UserService {
   private users: User[] = [

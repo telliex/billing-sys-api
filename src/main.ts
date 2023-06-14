@@ -1,7 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
+// import { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { AppModule } from './app.module';
 import * as session from 'express-session';
+// 为了在使用class-validator的DTO类中也可以注入nestjs容器的依赖，需要在main.ts中添加如下代码：
+import { useContainer } from 'class-validator';
 import { join } from 'path';
 
 async function bootstrap() {
@@ -19,6 +22,7 @@ async function bootstrap() {
       rolling: true, // session rolling
     }),
   );
-  await app.listen(5000);
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
+  await app.listen(7800, '0.0.0.0');
 }
 bootstrap();

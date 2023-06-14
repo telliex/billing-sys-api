@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Anthor: Telliex
+ * @Date: 2023-06-12 22:27:23
+ * @LastEditors: Telliex
+ * @LastEditTime: 2023-06-14 06:32:23
+ */
 import {
   Controller,
   Delete,
@@ -8,45 +15,45 @@ import {
   Body,
   Patch,
   Query,
+  Headers,
 } from '@nestjs/common';
 import { MenuService } from './menu.service';
+// import { CreateMenuDto, UpdateMenuDto } from './menu.dto';
 
 @Controller('menu')
 export class MenuController {
   constructor(private readonly menuService: MenuService) {}
   // List the menu list
   @Get()
-  findAlll(@Query() paginationQuery) {
+  async findAlll() {
     // const { limit, offset } = paginationQuery;
-    return this.menuService.findAll();
+    return await this.menuService.findAll();
   }
   // Get the menu item
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  async findOne(@Param('id') id: string) {
     // return `This is menu ${id} .`;
-    return this.menuService.findOne(Number(id));
+    return await this.menuService.findOne(id);
   }
   // Delete the menu item
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  async remove(@Param('id') id: string) {
     // return `menu ${id} has deleted.`;
-    return this.menuService.remove(Number(id));
+    return await this.menuService.remove(id);
   }
   // Create the menu item
   @Post()
-  create(@Body() body) {
-    return body;
-    // return 'menu item has created.';
-    return this.menuService.create(body);
+  create(@Headers() headers, @Body() body) {
+    return this.menuService.create(body, headers);
   }
-  // cover the menu item
+  // // cover the menu item
   @Put(':id')
-  cover(@Param('id') id: number, @Body() body) {
-    return this.menuService.cover(Number(id), body);
+  update(@Headers() headers, @Param('id') id: string, @Body() body) {
+    return this.menuService.update(id, body, headers);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: number, @Body() body) {
-    return this.menuService.update(Number(id), body);
-  }
+  // @Patch(':id')
+  // cover(@Param('id') id: string, @Body() body) {
+  //   return this.menuService.cover(id, body);
+  // }
 }
