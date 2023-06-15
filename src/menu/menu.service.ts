@@ -3,13 +3,14 @@
  * @Anthor: Telliex
  * @Date: 2023-06-10 10:41:15
  * @LastEditors: Telliex
- * @LastEditTime: 2023-06-14 06:39:35
+ * @LastEditTime: 2023-06-15 05:38:16
  */
 import { NotFoundException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Menu } from '../entity/menu.entity';
 import * as moment from 'moment';
+import { snakeCase, camelCase } from 'lodash';
 
 @Injectable()
 export class MenuService {
@@ -20,7 +21,7 @@ export class MenuService {
   // private menus: Menu[] = [
   // {
   //   id: '00094545-d268-41d2-afda-a2fa613478bb',
-  //   type: 'Page',
+  //   type: 'Page', v
   //   name: '回到MGT',
   //   description: '',
   //   component: 'LAYOUT',
@@ -31,80 +32,121 @@ export class MenuService {
   //   parentId: '',
   //   isExternalLink: true,
   //   isCache: false,
-  //   status: true,
+  //   status: true, v
   //   addMaster: 0,
   //   addTime: '2023-03-13T06:59:55',
   //   changeMaster: 0,
   //   changeTime: '2023-03-13T06:59:55',
   // },
   // ];Menu
-  async findAll(): Promise<Menu[]> {
+  async findAll(headers: any): Promise<Menu[]> {
     console.log('utc:', moment.utc().format('YYYY-MM-DD HH:mm:ss'));
     console.log(
       'utc+:',
       moment.utc().utcOffset('+08').format('YYYY-MM-DD HH:mm:ss'),
     );
-    return await this.menuRepository.find();
+    const output: any = await this.menuRepository.find();
+    output.forEach((item) => {
+      const temp = this.snakeCaseToCamelCase(item);
+      temp['changeTime']
+        ? this.offsetUtCTime(temp['changeTime'], headers['time-zone'])
+        : '';
+      temp['addTime']
+        ? this.offsetUtCTime(temp['addTime'], headers['time-zone'])
+        : '';
+      return;
+    });
+    return output;
   }
-  async findOne(id: string): Promise<Menu | null> {
+  async findOne(id: string, headers: any): Promise<Menu | null> {
     const targetMenu = await this.menuRepository.findOneBy({ id });
     if (!targetMenu) {
       throw new NotFoundException(`The menu #${id} is not found.`);
     }
-    return targetMenu;
+    const output: any = this.snakeCaseToCamelCase(targetMenu);
+    output['changeTime'] = output['changeTime']
+      ? this.offsetUtCTime(output['changeTime'], headers['time-zone'])
+      : '';
+    output['addTime'] = output['addTime']
+      ? this.offsetUtCTime(output['addTime'], headers['time-zone'])
+      : '';
+    return output;
   }
-  async remove(id: string): Promise<Menu | null> {
+  // remove menu item
+  async remove(id: string, headers: any): Promise<Menu | null> {
     const targetMenu = await this.menuRepository.findOneBy({ id });
+
     if (!targetMenu) {
       throw new NotFoundException(`The menu #${id} is not found.`);
     }
-    await this.menuRepository.delete(id);
-    return targetMenu;
+    const output = this.snakeCaseToCamelCase(
+      await this.menuRepository.remove(targetMenu),
+    ) as Menu;
+
+    output['changeTime'] = output['changeTime']
+      ? this.offsetUtCTime(output['changeTime'], headers['time-zone'])
+      : '';
+    output['addTime'] = output['addTime']
+      ? this.offsetUtCTime(output['addTime'], headers['time-zone'])
+      : '';
+    return output;
   }
   async create(menuItem: Menu, headers: any): Promise<Menu> {
-    console.log('headers:', headers);
+    const newMenuItem = this.menuRepository.create(
+      this.camelCaseToSnakeCase(menuItem),
+    );
+
     const user = Number(headers['user-id']);
-    const number = Number(headers['time-zone'].split('UTC+')[1]);
-    const utcOffset =
-      Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
-    const newMenuItem = new Menu();
-    for (const key in menuItem) {
-      if (key !== 'id') {
-        newMenuItem[key] = menuItem[key];
-      }
-    }
+    // const number = Number(headers['time-zone'].split('UTC+')[1]);
+    // const utcOffset =
+    //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
+    newMenuItem['id'] = undefined;
     newMenuItem['add_master'] = user;
-    newMenuItem['add_time'] = moment
-      .utc()
-      .utcOffset(utcOffset)
-      .format('YYYY-MM-DD HH:mm:ss');
+    newMenuItem['add_time'] = moment.utc().format('YYYY-MM-DD HH:mm:ss');
     newMenuItem['change_master'] = user;
-    newMenuItem['change_time'] = moment
-      .utc()
-      .utcOffset(utcOffset)
-      .format('YYYY-MM-DD HH:mm:ss');
-    return await this.menuRepository.save(newMenuItem);
+    newMenuItem['change_time'] = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+    const output = this.snakeCaseToCamelCase(
+      await this.menuRepository.save(newMenuItem),
+    ) as Menu;
+
+    output['changeTime'] = output['changeTime']
+      ? this.offsetUtCTime(output['changeTime'], headers['time-zone'])
+      : '';
+    output['addTime'] = output['addTime']
+      ? this.offsetUtCTime(output['addTime'], headers['time-zone'])
+      : '';
+    return output;
   }
-  async update(id: string, updateMenuDto: Menu, headers: any) {
-    const user = Number(headers['user-id']);
-    const number = Number(headers['time-zone'].split('UTC+')[1]);
-    const utcOffset =
-      Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
+  async update(id: string, updateMenu: Menu, headers: any) {
     const targetMenu = await this.menuRepository.findOneBy({ id });
-    console.log('targetMenu:', targetMenu);
+
+    const user = Number(headers['user-id']);
+    // const number = Number(headers['time-zone'].split('UTC+')[1]);
+    // const utcOffset =
+    //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
     if (targetMenu) {
-      for (const key in updateMenuDto) {
+      const updateMenuTemp = this.camelCaseToSnakeCase(updateMenu);
+      for (const key in updateMenuTemp) {
         if (key !== 'id') {
-          targetMenu[key] = updateMenuDto[key];
+          targetMenu[key] = updateMenuTemp[key];
         }
       }
       targetMenu['change_master'] = user;
       targetMenu['change_time'] = moment
         .utc()
-        .utcOffset(utcOffset)
+        // .utcOffset(utcOffset)
         .format('YYYY-MM-DD HH:mm:ss');
-      await this.menuRepository.save(targetMenu);
-      return targetMenu;
+
+      const output = this.snakeCaseToCamelCase(
+        await this.menuRepository.save(targetMenu),
+      ) as Menu;
+      output['changeTime'] = output['changeTime']
+        ? this.offsetUtCTime(output['changeTime'], headers['time-zone'])
+        : '';
+      output['addTime'] = output['addTime']
+        ? this.offsetUtCTime(output['addTime'], headers['time-zone'])
+        : '';
+      return output;
     } else {
       throw new NotFoundException(`The menu #${id} is not found.`);
     }
@@ -117,4 +159,22 @@ export class MenuService {
   //     throw new NotFoundException(`The menu #${id} is not found.`);
   //   }
   // }
+  camelCaseToSnakeCase(targetMenu: Menu) {
+    return Object.keys(targetMenu).reduce((acc, key) => {
+      const wantKey = snakeCase(key);
+      acc[wantKey] = targetMenu[key];
+      return acc;
+    }, {});
+  }
+  snakeCaseToCamelCase(targetMenu: Menu) {
+    return Object.keys(targetMenu).reduce((acc, key) => {
+      const wantKey = camelCase(key);
+      acc[wantKey] = targetMenu[key];
+      return acc;
+    }, {});
+  }
+  offsetUtCTime(time, timeZone: string) {
+    const number = Number(timeZone.split('UTC')[1]);
+    return moment(time).add(number, 'hours').format('YYYY-MM-DD HH:mm:ss');
+  }
 }
