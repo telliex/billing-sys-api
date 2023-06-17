@@ -3,7 +3,7 @@
  * @Anthor: Telliex
  * @Date: 2023-06-13 04:49:27
  * @LastEditors: Telliex
- * @LastEditTime: 2023-06-15 06:37:38
+ * @LastEditTime: 2023-06-16 23:19:42
  */
 import {
   Entity,
@@ -20,31 +20,31 @@ export class Menu {
   @Column({ type: 'varchar', width: 11, default: 'Page' })
   type: string;
   @Column({ type: 'varchar', width: 255, nullable: false })
-  name_name: string;
+  menu_name: string;
   @Column({ type: 'varchar', width: 255, default: '' })
   description: string;
-  @Column({ type: 'varchar', width: 255, default: '' })
+  @Column({ type: 'varchar', width: 100, default: '' })
   permission: string;
   @Column({ type: 'varchar', width: 255, default: '' })
   component: string;
   @Column({ type: 'varchar', width: 100, default: '' })
   component_name: string;
   @Column({ type: 'varchar', width: 500, default: '' })
-  root_path: string;
+  rout_path: string;
   @Column({ type: 'int', width: 11, default: 0 })
-  sort: number;
+  order_no: number;
   @Column({ type: 'varchar', width: 50, default: '' })
   icon: string;
   @Column({ type: 'varchar', width: 36, default: '' })
-  parent_id: string;
+  parent_menu: string;
   @Column({ type: 'tinyint', width: 1, default: 0 })
-  is_external_link: boolean;
+  is_ext: number;
   @Column({ type: 'tinyint', width: 1, default: 0 })
-  is_cache: boolean;
+  is_cache: number;
   @Column({ type: 'tinyint', width: 1, default: 0 })
-  is_show: boolean;
+  is_show: number;
   @Column({ type: 'tinyint', width: 1, default: 0 })
-  status: boolean;
+  status: number;
   @Column({ type: 'int', width: 11 })
   add_master: number;
   @Column('datetime')

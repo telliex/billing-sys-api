@@ -3,7 +3,7 @@
  * @Anthor: Telliex
  * @Date: 2023-06-12 22:27:23
  * @LastEditors: Telliex
- * @LastEditTime: 2023-06-14 00:28:57
+ * @LastEditTime: 2023-06-15 21:16:51
  */
 import {
   Module,
@@ -12,7 +12,6 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { MenuModule } from './menu/menu.module';
 
@@ -36,12 +35,15 @@ import { DataSource } from 'typeorm';
       database: 'ecloud',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
+      autoLoadEntities: true,
+      retryAttempts: 10,
+      retryDelay: 3000,
     }),
     UserModule,
     MenuModule,
   ],
   controllers: [AppController, KeepaliveController],
-  providers: [AppService],
+  providers: [],
 })
 export class AppModule implements NestModule {
   constructor(private dataSource: DataSource) {}

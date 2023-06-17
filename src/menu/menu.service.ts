@@ -3,12 +3,16 @@
  * @Anthor: Telliex
  * @Date: 2023-06-10 10:41:15
  * @LastEditors: Telliex
- * @LastEditTime: 2023-06-15 05:38:16
+ * @LastEditTime: 2023-06-16 21:29:29
  */
-import { NotFoundException, Injectable } from '@nestjs/common';
+import {
+  NotFoundException,
+  Injectable,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Menu } from '../entity/menu.entity';
+import { Menu } from './entity/menu.entity';
 import * as moment from 'moment';
 import { snakeCase, camelCase } from 'lodash';
 
@@ -40,11 +44,12 @@ export class MenuService {
   // },
   // ];Menu
   async findAll(headers: any): Promise<Menu[]> {
-    console.log('utc:', moment.utc().format('YYYY-MM-DD HH:mm:ss'));
-    console.log(
-      'utc+:',
-      moment.utc().utcOffset('+08').format('YYYY-MM-DD HH:mm:ss'),
-    );
+    if (!headers['time-zone']) {
+      throw new BadRequestException(`Missing UTC header.`);
+    }
+    if (!headers['user-id']) {
+      throw new BadRequestException(`Missing user id header.`);
+    }
     const output: any = await this.menuRepository.find();
     output.forEach((item) => {
       const temp = this.snakeCaseToCamelCase(item);
@@ -59,6 +64,12 @@ export class MenuService {
     return output;
   }
   async findOne(id: string, headers: any): Promise<Menu | null> {
+    if (!headers['time-zone']) {
+      throw new BadRequestException(`Missing UTC header.`);
+    }
+    if (!headers['user-id']) {
+      throw new BadRequestException(`Missing user id header.`);
+    }
     const targetMenu = await this.menuRepository.findOneBy({ id });
     if (!targetMenu) {
       throw new NotFoundException(`The menu #${id} is not found.`);
@@ -74,6 +85,12 @@ export class MenuService {
   }
   // remove menu item
   async remove(id: string, headers: any): Promise<Menu | null> {
+    if (!headers['time-zone']) {
+      throw new BadRequestException(`Missing UTC header.`);
+    }
+    if (!headers['user-id']) {
+      throw new BadRequestException(`Missing user id header.`);
+    }
     const targetMenu = await this.menuRepository.findOneBy({ id });
 
     if (!targetMenu) {
@@ -92,6 +109,12 @@ export class MenuService {
     return output;
   }
   async create(menuItem: Menu, headers: any): Promise<Menu> {
+    if (!headers['time-zone']) {
+      throw new BadRequestException(`Missing UTC header.`);
+    }
+    if (!headers['user-id']) {
+      throw new BadRequestException(`Missing user id header.`);
+    }
     const newMenuItem = this.menuRepository.create(
       this.camelCaseToSnakeCase(menuItem),
     );
@@ -118,6 +141,12 @@ export class MenuService {
     return output;
   }
   async update(id: string, updateMenu: Menu, headers: any) {
+    if (!headers['time-zone']) {
+      throw new BadRequestException(`Missing UTC header.`);
+    }
+    if (!headers['user-id']) {
+      throw new BadRequestException(`Missing user id header.`);
+    }
     const targetMenu = await this.menuRepository.findOneBy({ id });
 
     const user = Number(headers['user-id']);
@@ -151,14 +180,6 @@ export class MenuService {
       throw new NotFoundException(`The menu #${id} is not found.`);
     }
   }
-  // cover(id: string, coverMenuDto: Menu) {
-  //   const targetMenu = await this.menuRepository.findOneBy({ id });
-  //   if (targetMenu) {
-  //     this.menus[menuIndex] = coverMenuDto;
-  //   } else {
-  //     throw new NotFoundException(`The menu #${id} is not found.`);
-  //   }
-  // }
   camelCaseToSnakeCase(targetMenu: Menu) {
     return Object.keys(targetMenu).reduce((acc, key) => {
       const wantKey = snakeCase(key);
