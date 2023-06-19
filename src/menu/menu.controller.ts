@@ -3,7 +3,7 @@
  * @Anthor: Telliex
  * @Date: 2023-06-12 22:27:23
  * @LastEditors: Telliex
- * @LastEditTime: 2023-06-16 05:48:08
+ * @LastEditTime: 2023-06-19 02:16:21
  */
 import {
   Controller,
@@ -11,12 +11,18 @@ import {
   Get,
   Param,
   Post,
-  Put,
+  Patch,
   Headers,
   Body,
+  Query,
 } from '@nestjs/common';
 import { MenuService } from './menu.service';
 // import { CreateMenuDto, UpdateMenuDto } from './menu.dto';
+
+interface FilterParam {
+  menu_name: string;
+  status: number;
+}
 
 @Controller('system/menu')
 export class MenuController {
@@ -24,9 +30,9 @@ export class MenuController {
   // constructor() {@InjectRepository(Menu) private readonly menuRepository: Repository<Menu>}
   // List the menu list
   @Get()
-  async findAlll(@Headers() headers) {
+  async findAlll(@Headers() headers, @Query() filterParam: FilterParam) {
     // const { limit, offset } = paginationQuery;
-    return await this.menuService.findAll(headers);
+    return await this.menuService.findAll(headers, filterParam);
   }
   // Get the menu item
   @Get(':id')
@@ -45,7 +51,7 @@ export class MenuController {
     return this.menuService.create(body, headers);
   }
   // cover the menu item
-  @Put(':id')
+  @Patch(':id')
   update(@Headers() headers, @Param('id') id: string, @Body() body) {
     return this.menuService.update(id, body, headers);
   }

@@ -3,7 +3,7 @@
  * @Anthor: Telliex
  * @Date: 2023-06-12 22:27:23
  * @LastEditors: Telliex
- * @LastEditTime: 2023-06-15 21:16:51
+ * @LastEditTime: 2023-06-18 22:40:46
  */
 import {
   Module,
@@ -34,7 +34,7 @@ import { DataSource } from 'typeorm';
       password: 'zA#L2xetEcMu!o3^',
       database: 'ecloud',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+      synchronize: false,
       autoLoadEntities: true,
       retryAttempts: 10,
       retryDelay: 3000,

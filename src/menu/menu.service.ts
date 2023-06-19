@@ -3,7 +3,7 @@
  * @Anthor: Telliex
  * @Date: 2023-06-10 10:41:15
  * @LastEditors: Telliex
- * @LastEditTime: 2023-06-16 21:29:29
+ * @LastEditTime: 2023-06-19 06:03:20
  */
 import {
   NotFoundException,
@@ -14,7 +14,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Menu } from './entity/menu.entity';
 import * as moment from 'moment';
-import { snakeCase, camelCase } from 'lodash';
+import { snakeCase, camelCase, isNil } from 'lodash';
 
 @Injectable()
 export class MenuService {
@@ -43,15 +43,23 @@ export class MenuService {
   //   changeTime: '2023-03-13T06:59:55',
   // },
   // ];Menu
-  async findAll(headers: any): Promise<Menu[]> {
+  async findAll(headers: any, query: any): Promise<Menu[]> {
     if (!headers['time-zone']) {
       throw new BadRequestException(`Missing UTC header.`);
     }
     if (!headers['user-id']) {
       throw new BadRequestException(`Missing user id header.`);
     }
-    const output: any = await this.menuRepository.find();
-    output.forEach((item) => {
+    let output: any[] = await this.menuRepository.find({
+      where: {
+        menu_name: query['menuName'] ? query['menuName'] : null,
+        status: query['status'] ? query['status'] : null,
+      },
+      order: {
+        order_no: 'ASC',
+      },
+    });
+    output = output.map((item) => {
       const temp = this.snakeCaseToCamelCase(item);
       temp['changeTime']
         ? this.offsetUtCTime(temp['changeTime'], headers['time-zone'])
@@ -59,8 +67,10 @@ export class MenuService {
       temp['addTime']
         ? this.offsetUtCTime(temp['addTime'], headers['time-zone'])
         : '';
-      return;
+      return temp;
     });
+    console.log('outpu=======t');
+    console.log(output);
     return output;
   }
   async findOne(id: string, headers: any): Promise<Menu | null> {
@@ -71,7 +81,7 @@ export class MenuService {
       throw new BadRequestException(`Missing user id header.`);
     }
     const targetMenu = await this.menuRepository.findOneBy({ id });
-    if (!targetMenu) {
+    if (isNil(targetMenu)) {
       throw new NotFoundException(`The menu #${id} is not found.`);
     }
     const output: any = this.snakeCaseToCamelCase(targetMenu);
@@ -153,32 +163,32 @@ export class MenuService {
     // const number = Number(headers['time-zone'].split('UTC+')[1]);
     // const utcOffset =
     //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
-    if (targetMenu) {
-      const updateMenuTemp = this.camelCaseToSnakeCase(updateMenu);
-      for (const key in updateMenuTemp) {
-        if (key !== 'id') {
-          targetMenu[key] = updateMenuTemp[key];
-        }
-      }
-      targetMenu['change_master'] = user;
-      targetMenu['change_time'] = moment
-        .utc()
-        // .utcOffset(utcOffset)
-        .format('YYYY-MM-DD HH:mm:ss');
-
-      const output = this.snakeCaseToCamelCase(
-        await this.menuRepository.save(targetMenu),
-      ) as Menu;
-      output['changeTime'] = output['changeTime']
-        ? this.offsetUtCTime(output['changeTime'], headers['time-zone'])
-        : '';
-      output['addTime'] = output['addTime']
-        ? this.offsetUtCTime(output['addTime'], headers['time-zone'])
-        : '';
-      return output;
-    } else {
+    if (isNil(targetMenu)) {
       throw new NotFoundException(`The menu #${id} is not found.`);
     }
+
+    const updateMenuTemp = this.camelCaseToSnakeCase(updateMenu);
+    for (const key in updateMenuTemp) {
+      if (key !== 'id') {
+        targetMenu[key] = updateMenuTemp[key];
+      }
+    }
+    targetMenu['change_master'] = user;
+    targetMenu['change_time'] = moment
+      .utc()
+      // .utcOffset(utcOffset)
+      .format('YYYY-MM-DD HH:mm:ss');
+
+    const output = this.snakeCaseToCamelCase(
+      await this.menuRepository.save(targetMenu),
+    ) as Menu;
+    output['changeTime'] = output['changeTime']
+      ? this.offsetUtCTime(output['changeTime'], headers['time-zone'])
+      : '';
+    output['addTime'] = output['addTime']
+      ? this.offsetUtCTime(output['addTime'], headers['time-zone'])
+      : '';
+    return output;
   }
   camelCaseToSnakeCase(targetMenu: Menu) {
     return Object.keys(targetMenu).reduce((acc, key) => {
