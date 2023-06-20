@@ -1,19 +1,14 @@
-/*
- * @Description:
- * @Anthor: Telliex
- * @Date: 2023-06-12 22:27:23
- * @LastEditors: Telliex
- * @LastEditTime: 2023-06-15 22:17:22
- */
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-// import { NestFastifyApplication } from '@nestjs/platform-fastify';
+// import {
+//   FastifyAdapter,
+//   NestFastifyApplication,
+// } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
-import * as session from 'express-session';
+
 // 为了在使用class-validator的DTO类中也可以注入nestjs容器的依赖，需要在main.ts中添加如下代码：
 import { useContainer } from 'class-validator';
 import { join } from 'path';
-
 import * as cors from 'cors';
 
 function MiddleWareToAll(res: any, req: any, next: any) {
@@ -28,18 +23,9 @@ async function bootstrap() {
   app.setViewEngine('hbs'); // view engine
   app.setGlobalPrefix('api/v1.0'); // global prefix
   app.use(MiddleWareToAll); // global middleware
-  app.use(cors()); // cors
-  app.use(
-    session({
-      secret: 'It is a secret',
-      cookie: {
-        maxAge: 1000 * 60 * 3,
-        httpOnly: true,
-      },
-      rolling: true, // session rolling
-    }),
-  );
+  app.use(cors); // cors
+
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
-  await app.listen(7800, '0.0.0.0');
+  await app.listen(5000, '0.0.0.0');
 }
 bootstrap();
