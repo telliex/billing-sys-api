@@ -8,7 +8,7 @@ RUN npm install -g pnpm && pnpm install
 
 COPY . .
 
-CMD [ "npm", "start" ]
+CMD [ "pnpm", "start" ]
 # # 基於 Ubuntu 映像構建 Docker 容器
 # FROM ubuntu:latest as build-stage
 

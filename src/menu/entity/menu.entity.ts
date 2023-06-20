@@ -3,7 +3,7 @@
  * @Anthor: Telliex
  * @Date: 2023-06-13 04:49:27
  * @LastEditors: Telliex
- * @LastEditTime: 2023-06-19 00:35:57
+ * @LastEditTime: 2023-06-20 05:58:45
  */
 import {
   Entity,
@@ -13,7 +13,7 @@ import {
   // UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('menu')
+@Entity('bill_system_menu')
 export class Menu {
   @PrimaryGeneratedColumn('uuid')
   id: string;
