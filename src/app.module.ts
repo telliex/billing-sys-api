@@ -1,16 +1,10 @@
 /*
- * @Description:
- * @Anthor: Telliex
- * @Date: 2023-06-20 00:20:34
- * @LastEditors: Telliex
- * @LastEditTime: 2023-06-20 14:23:38
- */
-/*
- * @Description:
- * @Anthor: Telliex
- * @Date: 2023-06-12 22:27:23
- * @LastEditors: Telliex
- * @LastEditTime: 2023-06-20 00:55:00
+ * @Author: Telliex.Chiu Telliex.Chiu@ecliudvalle.com.tw
+ * @Date: 2023-06-21 03:35:59
+ * @LastEditors: Telliex.Chiu Telliex.Chiu@ecliudvalle.com.tw
+ * @LastEditTime: 2023-06-21 04:52:19
+ * @FilePath: /test2-project/home/telliex-chiu/project/billing-sys-api/src/app.module.ts
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import {
   Module,
@@ -19,15 +13,10 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { UserModule } from './user/user.module';
 import { MenuModule } from './menu/menu.module';
-
 import { InitMiddleware } from './middleware/init.middleware';
 import { KeepaliveController } from './keepalive/keepalive.controller';
-// import { CoreModule } from './core/core.module';
 
-
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { database } from './config';
 import { CoreModule } from './core/core.module';
 
@@ -48,7 +37,6 @@ import { CoreModule } from './core/core.module';
     //   retryDelay: 3000,
     // }),
     CoreModule.forRoot(database()),
-    UserModule,
     MenuModule,
   ],
   controllers: [AppController, KeepaliveController],

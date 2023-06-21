@@ -2,8 +2,8 @@
  * @Description:
  * @Anthor: Telliex
  * @Date: 2023-06-10 10:41:15
- * @LastEditors: Telliex
- * @LastEditTime: 2023-06-20 12:02:25
+ * @LastEditors: Telliex.Chiu Telliex.Chiu@ecliudvalle.com.tw
+ * @LastEditTime: 2023-06-21 06:49:59
  */
 import {
   NotFoundException,
@@ -20,42 +20,9 @@ interface Header {
   "user-id": number;
   "time-zone": string;
 }
-interface TypeMenuItem{
-  id?: string;
-  type?: string;
-  menuName?: string;
-  menu_name?: string;
-  description?: string;
-  permission?: string;
-  component?: string;
-  componentName?: string;
-  component_name?: string;
-  routPath?: string;
-  rout_path?: string;
-  orderNo?: number;
-  order_no?: number;
-  icon?: string;
-  parentMenu?: string;
-  parent_menu?: string;
-  isExt?: number;
-  is_ext?: number;
-  isCache?: number;
-  is_cache?: number;
-  isShow?: number;
-  is_show?: number;
-  status?: number;
-  addMaster?: number;
-  add_master?: number;
-  addTime?: string;
-  add_time?: string;
-  changeMaster?: number;
-  change_master?: number;
-  changeTime?: string;
-  change_time?: string;
-}
 
 interface SnakeTypeMenuItem{
-  id: string;
+  id: string | null;
   type: string;
   menu_name: string;
   description: string;
@@ -232,6 +199,7 @@ export class MenuService {
     const updateMenuTemp = this.camelCaseToSnakeCase(updateMenu);
     for (const key in updateMenuTemp) {
       if (key !== 'id') {
+        // @ts-ignore
         targetMenu[key as keyof SnakeTypeMenuItem]= updateMenuTemp[key as keyof SnakeTypeMenuItem];
       }
     }
@@ -255,6 +223,7 @@ export class MenuService {
   camelCaseToSnakeCase(targetMenu: CamelTypeMenuItem):SnakeTypeMenuItem {
     const snakeTypeMenu = Object.keys(targetMenu).reduce((acc, key) => {
       const wantKey = snakeCase(key) as keyof SnakeTypeMenuItem;
+      // @ts-ignore
       acc[wantKey] = targetMenu[key] as SnakeTypeMenuItem[keyof SnakeTypeMenuItem];
       return acc;
     }, {} as SnakeTypeMenuItem);
@@ -266,6 +235,7 @@ export class MenuService {
   snakeCaseToCamelCase(targetMenu: SnakeTypeMenuItem):CamelTypeMenuItem {
     return Object.keys(targetMenu).reduce((acc, key) => {
       const wantKey = camelCase(key) as keyof CamelTypeMenuItem;
+      // @ts-ignore
       acc[wantKey] = targetMenu[key] as CamelTypeMenuItem[keyof CamelTypeMenuItem];
       return acc;
     }, {} as CamelTypeMenuItem);
