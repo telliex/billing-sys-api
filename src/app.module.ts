@@ -1,11 +1,3 @@
-/*
- * @Author: Telliex.Chiu Telliex.Chiu@ecliudvalle.com.tw
- * @Date: 2023-06-21 03:35:59
- * @LastEditors: Telliex.Chiu Telliex.Chiu@ecliudvalle.com.tw
- * @LastEditTime: 2023-06-21 04:52:19
- * @FilePath: /test2-project/home/telliex-chiu/project/billing-sys-api/src/app.module.ts
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 import {
   Module,
   NestModule,
@@ -18,7 +10,8 @@ import { InitMiddleware } from './middleware/init.middleware';
 import { KeepaliveController } from './keepalive/keepalive.controller';
 
 import { database } from './config';
-import { CoreModule } from './core/core.module';
+// import { CoreModule } from './core/core.module';
+import { DatabaseModule} from './modules/database/database.module';
 
 @Module({
   imports: [
@@ -36,7 +29,8 @@ import { CoreModule } from './core/core.module';
     //   retryAttempts: 10,
     //   retryDelay: 3000,
     // }),
-    CoreModule.forRoot(database()),
+    // CoreModule.forRoot(database()),
+    DatabaseModule.forRoot(database),
     MenuModule,
   ],
   controllers: [AppController, KeepaliveController],
