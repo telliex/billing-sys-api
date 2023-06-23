@@ -2,8 +2,8 @@
  * @Description:
  * @Anthor: Telliex
  * @Date: 2023-06-10 10:41:15
- * @LastEditors: Telliex.Chiu Telliex.Chiu@ecliudvalle.com.tw
- * @LastEditTime: 2023-06-21 06:49:59
+ * @LastEditors: Telliex.chiu outsourcing_billing_1@ecloudvalley.com
+ * @LastEditTime: 2023-06-23 14:30:50
  */
 import {
   NotFoundException,
@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import {PaginateOptions , QueryHook} from '../modules/database/types'
 import { Menu } from './entity/menu.entity';
 import moment from 'moment';
 import { snakeCase, camelCase, isNil } from 'lodash';
@@ -71,6 +72,14 @@ export class MenuService {
     @InjectRepository(Menu)
     private menuRepository: Repository<Menu>,
   ) {}
+
+  async paginate(options: PaginateOptions,callback?: QueryHook<Menu>){
+
+  };
+
+  async findDetail(id: string, callback?: QueryHook<Menu>): Promise{
+
+  };
   async findAll(headers: Header, query: any): Promise<Menu[]> {
     if (!headers['time-zone']) {
       throw new BadRequestException(`Missing UTC header.`);
