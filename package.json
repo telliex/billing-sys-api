@@ -39,7 +39,8 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "sanitize-html": "^2.11.0",
-    "typeorm": "^0.3.17"
+    "typeorm": "^0.3.17",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.3",
@@ -55,7 +56,6 @@
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
-    "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "eslint": "^8.43.0",
     "eslint-config-airbnb-base": "^15.0.0",
