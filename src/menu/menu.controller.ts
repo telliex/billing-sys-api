@@ -3,7 +3,7 @@
  * @Anthor: Telliex
  * @Date: 2023-06-12 22:27:23
  * @LastEditors: Telliex.Chiu Telliex.Chiu@ecliudvalle.com.tw
- * @LastEditTime: 2023-06-24 06:57:25
+ * @LastEditTime: 2023-06-26 06:49:05
  */
 import { Controller, Get, Headers, Query, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 
@@ -70,13 +70,7 @@ export class MenuController {
     create(
         @Headers() headers: Header,
         @Body()
-        createMenuDto: // new ValidationPipe({
-        //     transform: true, // Serialize data
-        //     forbidUnknownValues: true, // forbid all unknown values
-        //     validationError: { target: false }, // ont only validate target error
-        //     groups: ['create'],
-        // }),
-        MenuDto,
+        createMenuDto: MenuDto,
     ): Promise<MenuDto> {
         return this.menuService.create(createMenuDto, headers);
     }
@@ -87,13 +81,7 @@ export class MenuController {
         @Headers() headers: Header,
         @Param('id') id: string,
         @Body()
-        updateMenuDto: // new ValidationPipe({
-        //     transform: true, // Serialize data
-        //     forbidUnknownValues: true, // forbid  all unknown values
-        //     validationError: { target: false }, // ont only validate target error
-        //     groups: ['update'],
-        // }),
-        MenuDto,
+        updateMenuDto: MenuDto,
     ): Promise<MenuDto> {
         return this.menuService.update(id, updateMenuDto, headers);
     }
