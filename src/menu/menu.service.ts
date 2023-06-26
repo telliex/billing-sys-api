@@ -97,7 +97,7 @@ export class MenuService {
         //
     }
 
-    async findAll(headers: Header, query: any): Promise<Menu[]> {
+    async findList(headers: Header, query: any): Promise<Menu[]> {
         if (!headers['time-zone']) {
             throw new BadRequestException(`Missing UTC header.`);
         }
@@ -124,6 +124,33 @@ export class MenuService {
         console.log(output);
         return output;
     }
+    async findAll(headers: Header, query: any): Promise<Menu[]> {
+      if (!headers['time-zone']) {
+          throw new BadRequestException(`Missing UTC header.`);
+      }
+      if (!headers['user-id']) {
+          throw new BadRequestException(`Missing user id header.`);
+      }
+
+      let output: any[] = await this.menuRepository.find({
+          where: {
+              menu_name: query.menuName ? query.menuName : null,
+              status: query.status ? query.status : null,
+          },
+          order: {
+              order_no: 'ASC',
+          },
+      });
+      output = output.map((item) => {
+          const temp: any = this.snakeCaseToCamelCase(item);
+          temp.changeTime ? this.offsetUtCTime(temp.changeTime, headers['time-zone']) : '';
+          temp.addTime ? this.offsetUtCTime(temp.addTime, headers['time-zone']) : '';
+          return temp;
+      });
+      console.log('outpu=======t');
+      console.log(output);
+      return output;
+  }
 
     async findOne(id: string, headers: Header): Promise<Menu | null> {
         if (!headers['time-zone']) {

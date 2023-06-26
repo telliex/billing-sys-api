@@ -63,3 +63,4 @@ export interface Menu {
     changeMaster: number;
     changeTime: string;
 }
+

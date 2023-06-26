@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Transform, Expose } from 'class-transformer';
-import { IsNotEmpty, MaxLength, IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsNotEmpty, MaxLength, IsNumber, IsString, Max, Min, IsOptional } from 'class-validator';
 
 // import { snakeCase } from 'lodash';
 
@@ -125,4 +125,23 @@ export class MenuDto {
     @Expose({ name: 'change_time' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     changeTime: string;
+}
+
+
+export class FilterParamDto {
+  @IsString()
+  @IsOptional()
+  menuName: string;
+  @IsNumber()
+  @IsOptional()
+  status: number;
+}
+export class HeaderParamD {
+  @IsString()
+  @IsNotEmpty({ message: 'user id required' })
+  'user-id': number;
+
+  @IsString()
+  @IsNotEmpty({ message: 'time zine required' })
+  'time-zone': string;
 }
