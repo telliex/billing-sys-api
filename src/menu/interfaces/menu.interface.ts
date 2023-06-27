@@ -1,5 +1,5 @@
 export interface SnakeTypeMenuItem {
-    id: string;
+    id: string | null;
     type: string;
     menu_name: string;
     description: string;
@@ -64,3 +64,20 @@ export interface Menu {
     changeTime: string;
 }
 
+export interface MetaItem {
+    title?: string;
+    hideChildrenInMenu?: boolean;
+    icon?: string;
+    currentActiveMenu?: string;
+    hideBreadcrumb?: boolean;
+    hideMenu?: boolean;
+}
+
+export interface NavItem {
+    path?: string;
+    name?: string;
+    component?: string;
+    redirect?: string;
+    meta?: MetaItem;
+    children?: NavItem[];
+}

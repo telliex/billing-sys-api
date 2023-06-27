@@ -23,7 +23,7 @@ async function bootstrap() {
     app.useStaticAssets(join(__dirname, '..', 'public'), { prefix: '/static/' }); // static folder
     app.setBaseViewsDir(join(__dirname, '..', 'views')); // views folder
     app.setViewEngine('hbs'); // view engine
-    app.setGlobalPrefix('api/v1.0'); // global prefix
+    // app.setGlobalPrefix('api/v1.0'); // global prefix
     app.use(MiddleWareToAll); // global middleware
     // app.use(cors); // cors
 

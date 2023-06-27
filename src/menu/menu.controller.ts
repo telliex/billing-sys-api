@@ -2,24 +2,28 @@
  * @Description:
  * @Anthor: Telliex
  * @Date: 2023-06-12 22:27:23
- * @LastEditors: Telliex.chiu outsourcing_billing_1@ecloudvalley.com
- * @LastEditTime: 2023-06-26 15:55:51
+ * @LastEditors: Telliex.Chiu Telliex.Chiu@ecliudvalle.com.tw
+ * @LastEditTime: 2023-06-27 00:30:41
  */
-import { Controller, Get, Headers, Query, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Headers,
+    Query,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    UsePipes,
+    ValidationPipe,
+} from '@nestjs/common';
 
 import { MenuDto, FilterParamDto, HeaderParamDto } from './dto';
+import { NavItem } from './interfaces/menu.interface';
 import { MenuService } from './menu.service';
 
-// interface FilterParam {
-//     menuName: string;
-//     status: number;
-// }
-// interface Header {
-//     'user-id': number;
-//     'time-zone': string;
-// }
-
-@Controller('system/menu')
+@Controller('api/v1.0/system/menu')
 export class MenuController {
     constructor(private readonly menuService: MenuService) {}
 
@@ -32,7 +36,10 @@ export class MenuController {
     }
 
     @Get('list')
-    async findList(@Headers() headers: HeaderParamDto, @Query() filterParam: FilterParamDto) {
+    async findList(
+        @Headers() headers: HeaderParamDto,
+        @Query() filterParam: FilterParamDto,
+    ): Promise<NavItem[]> {
         // const { limit, offset } = paginationQuery;
         return this.menuService.findList(headers, filterParam);
     }
@@ -53,10 +60,10 @@ export class MenuController {
     // // Create the menu item
     @Post()
     @UsePipes(
-      new ValidationPipe({
-        transform: true, // 將請求數據自動轉換為 DTO 對象
-        whitelist: true, // 只保留 DTO 中定義的屬性
-      }),
+        new ValidationPipe({
+            transform: true, // 將請求數據自動轉換為 DTO 對象
+            whitelist: true, // 只保留 DTO 中定義的屬性
+        }),
     )
     create(
         @Headers() headers: HeaderParamDto,
@@ -69,10 +76,10 @@ export class MenuController {
     // cover the menu item
     @Patch(':id')
     @UsePipes(
-      new ValidationPipe({
-        transform: true, // 將請求數據自動轉換為 DTO 對象
-        whitelist: true, // 只保留 DTO 中定義的屬性
-      }),
+        new ValidationPipe({
+            transform: true, // 將請求數據自動轉換為 DTO 對象
+            whitelist: true, // 只保留 DTO 中定義的屬性
+        }),
     )
     update(
         @Headers() headers: HeaderParamDto,

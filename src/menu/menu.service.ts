@@ -7,54 +7,11 @@ import { Repository } from 'typeorm';
 import { PaginateOptions, QueryHook } from '../modules/database/types';
 
 import { Menu } from './entity/menu.entity';
+import { NavItem, SnakeTypeMenuItem, CamelTypeMenuItem } from './interfaces/menu.interface';
 
 interface Header {
     'user-id': number;
     'time-zone': string;
-}
-
-interface SnakeTypeMenuItem {
-    id: string | null;
-    type: string;
-    menu_name: string;
-    description: string;
-    permission: string;
-    component: string;
-    component_name: string;
-    rout_path: string;
-    order_no: number;
-    icon: string;
-    parent_menu: string;
-    is_ext: number;
-    is_cache: number;
-    is_show: number;
-    status: number;
-    add_master: number;
-    add_time: string;
-    change_master: number;
-    change_time: string;
-}
-
-interface CamelTypeMenuItem {
-    id: string;
-    type: string;
-    menuName: string;
-    description: string;
-    permission: string;
-    component: string;
-    componentName: string;
-    routPath: string;
-    orderNo: number;
-    icon: string;
-    parentMenu: string;
-    isExt: number;
-    isCache: number;
-    isShow: number;
-    status: number;
-    addMaster: number;
-    addTime: string;
-    changeMaster: number;
-    changeTime: string;
 }
 
 @Injectable()
@@ -97,7 +54,298 @@ export class MenuService {
         //
     }
 
-    async findList(headers: Header, query: any): Promise<Menu[]> {
+    async findList(headers: Header, query: any): Promise<NavItem[]> {
+        if (!headers['time-zone']) {
+            throw new BadRequestException(`Missing UTC header.`);
+        }
+        if (!headers['user-id']) {
+            throw new BadRequestException(`Missing user id header.`);
+        }
+
+        const temp: any[] = await this.menuRepository.find({
+            where: {
+                menu_name: query.menuName ? query.menuName : null,
+                status: query.status ? query.status : null,
+            },
+            order: {
+                order_no: 'ASC',
+            },
+        });
+        console.log('temp:', temp);
+
+        temp.forEach((item) => {
+            if (item.parent_menu === '' && item.type === 'catalog') {
+                // menuTree.push(item);
+            } else {
+                temp.forEach((subItem) => {
+                    if (item.parent_menu === subItem.id) {
+                        if (subItem.children) {
+                            subItem.children.push(item);
+                        } else {
+                            subItem.children = [item];
+                        }
+                    }
+                });
+            }
+        });
+
+        const menuTree = temp.filter((item) => item.parent_menu === '' && item.type === 'catalog');
+        console.log('menuTree:', menuTree);
+
+        // single
+        const dashboardRoute = {
+            path: '/dashboard',
+            name: 'Dashboard',
+            component: 'LAYOUT',
+            redirect: '/dashboard/analysis',
+            meta: {
+                title: 'routes.dashboard.dashboard',
+                hideChildrenInMenu: true,
+                icon: 'bx:bx-home',
+            },
+            children: [
+                {
+                    path: 'analysis',
+                    name: 'Analysis',
+                    component: '/dashboard/analysis/index',
+                    meta: {
+                        hideMenu: true,
+                        hideBreadcrumb: true,
+                        title: 'routes.dashboard.analysis',
+                        currentActiveMenu: '/dashboard',
+                        icon: 'bx:bx-home',
+                    },
+                },
+                {
+                    path: 'workbench',
+                    name: 'Workbench',
+                    component: '/dashboard/workbench/index',
+                    meta: {
+                        hideMenu: true,
+                        hideBreadcrumb: true,
+                        title: 'routes.dashboard.workbench',
+                        currentActiveMenu: '/dashboard',
+                        icon: 'bx:bx-home',
+                    },
+                },
+            ],
+        };
+
+        const backRoute = {
+            path: 'back',
+            name: 'PermissionBackDemo',
+            meta: {
+                title: 'routes.demo.permission.back',
+            },
+
+            children: [
+                {
+                    path: 'page',
+                    name: 'BackAuthPage',
+                    component: '/demo/permission/back/index',
+                    meta: {
+                        title: 'routes.demo.permission.backPage',
+                    },
+                },
+                {
+                    path: 'btn',
+                    name: 'BackAuthBtn',
+                    component: '/demo/permission/back/Btn',
+                    meta: {
+                        title: 'routes.demo.permission.backBtn',
+                    },
+                },
+            ],
+        };
+
+        const authRoute = {
+            path: '/permission',
+            name: 'Permission',
+            component: 'LAYOUT',
+            redirect: '/permission/front/page',
+            meta: {
+                icon: 'carbon:user-role',
+                title: 'routes.demo.permission.permission',
+            },
+            children: [backRoute],
+        };
+
+        const levelRoute = {
+            path: '/level',
+            name: 'Level',
+            component: 'LAYOUT',
+            redirect: '/level/menu1/menu1-1',
+            meta: {
+                icon: 'carbon:user-role',
+                title: 'routes.demo.level.level',
+            },
+
+            children: [
+                {
+                    path: 'menu1',
+                    name: 'Menu1Demo',
+                    meta: {
+                        title: 'Menu1',
+                    },
+                    children: [
+                        {
+                            path: 'menu1-1',
+                            name: 'Menu11Demo',
+                            meta: {
+                                title: 'Menu1-1',
+                            },
+                            children: [
+                                {
+                                    path: 'menu1-1-1',
+                                    name: 'Menu111Demo',
+                                    component: '/demo/level/Menu111',
+                                    meta: {
+                                        title: 'Menu111',
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            path: 'menu1-2',
+                            name: 'Menu12Demo',
+                            component: '/demo/level/Menu12',
+                            meta: {
+                                title: 'Menu1-2',
+                            },
+                        },
+                    ],
+                },
+                {
+                    path: 'menu2',
+                    name: 'Menu2Demo',
+                    component: '/demo/level/Menu2',
+                    meta: {
+                        title: 'Menu2',
+                    },
+                },
+            ],
+        };
+
+        const sysRoute = {
+            path: '/system',
+            name: 'System',
+            component: 'LAYOUT',
+            redirect: '/system/account',
+            meta: {
+                icon: 'ion:settings-outline',
+                title: 'routes.demo.system.moduleName',
+            },
+            children: [
+                {
+                    path: 'account',
+                    name: 'AccountManagement',
+                    meta: {
+                        title: 'routes.demo.system.account',
+                        ignoreKeepAlive: true,
+                    },
+                    component: '/demo/system/account/index',
+                },
+                {
+                    path: 'account_detail/:id',
+                    name: 'AccountDetail',
+                    meta: {
+                        hideMenu: true,
+                        title: 'routes.demo.system.account_detail',
+                        ignoreKeepAlive: true,
+                        showMenu: false,
+                        currentActiveMenu: '/system/account',
+                    },
+                    component: '/demo/system/account/AccountDetail',
+                },
+                {
+                    path: 'role',
+                    name: 'RoleManagement',
+                    meta: {
+                        title: 'routes.demo.system.role',
+                        ignoreKeepAlive: true,
+                    },
+                    component: '/demo/system/role/index',
+                },
+
+                {
+                    path: 'menu',
+                    name: 'MenuManagement',
+                    meta: {
+                        title: 'routes.demo.system.menu',
+                        ignoreKeepAlive: true,
+                    },
+                    component: '/demo/system/menu/index',
+                },
+                {
+                    path: 'dept',
+                    name: 'DeptManagement',
+                    meta: {
+                        title: 'routes.demo.system.dept',
+                        ignoreKeepAlive: true,
+                    },
+                    component: '/demo/system/dept/index',
+                },
+                {
+                    path: 'changePassword',
+                    name: 'ChangePassword',
+                    meta: {
+                        title: 'routes.demo.system.password',
+                        ignoreKeepAlive: true,
+                    },
+                    component: '/demo/system/password/index',
+                },
+            ],
+        };
+
+        const linkRoute = {
+            path: '/link',
+            name: 'Link',
+            component: 'LAYOUT',
+            meta: {
+                icon: 'ion:tv-outline',
+                title: 'routes.demo.iframe.frame',
+            },
+            children: [
+                {
+                    path: 'doc',
+                    name: 'Doc',
+                    meta: {
+                        title: 'routes.demo.iframe.doc',
+                        frameSrc: 'https://doc.vvbin.cn/',
+                    },
+                },
+                {
+                    path: 'https://doc.vvbin.cn/',
+                    name: 'DocExternal',
+                    component: 'LAYOUT',
+                    meta: {
+                        title: 'routes.demo.iframe.docExternal',
+                    },
+                },
+            ],
+        };
+
+        // let output: any[] = await this.menuRepository.find({
+        //     where: {
+        //         menu_name: query.menuName ? query.menuName : null,
+        //         status: query.status ? query.status : null,
+        //     },
+        //     order: {
+        //         order_no: 'ASC',
+        //     },
+        // });
+        // output = output.map((item) => {
+        //     const temp: any = this.snakeCaseToCamelCase(item);
+        //     temp.changeTime ? this.offsetUtCTime(temp.changeTime, headers['time-zone']) : '';
+        //     temp.addTime ? this.offsetUtCTime(temp.addTime, headers['time-zone']) : '';
+        //     return temp;
+        // });
+        // console.log('outpu=======t');
+        // console.log(output);
+        return [dashboardRoute, authRoute, levelRoute, sysRoute, linkRoute];
+    }
+
+    async findAll(headers: Header, query: any): Promise<Menu[]> {
         if (!headers['time-zone']) {
             throw new BadRequestException(`Missing UTC header.`);
         }
@@ -124,33 +372,6 @@ export class MenuService {
         console.log(output);
         return output;
     }
-    async findAll(headers: Header, query: any): Promise<Menu[]> {
-      if (!headers['time-zone']) {
-          throw new BadRequestException(`Missing UTC header.`);
-      }
-      if (!headers['user-id']) {
-          throw new BadRequestException(`Missing user id header.`);
-      }
-
-      let output: any[] = await this.menuRepository.find({
-          where: {
-              menu_name: query.menuName ? query.menuName : null,
-              status: query.status ? query.status : null,
-          },
-          order: {
-              order_no: 'ASC',
-          },
-      });
-      output = output.map((item) => {
-          const temp: any = this.snakeCaseToCamelCase(item);
-          temp.changeTime ? this.offsetUtCTime(temp.changeTime, headers['time-zone']) : '';
-          temp.addTime ? this.offsetUtCTime(temp.addTime, headers['time-zone']) : '';
-          return temp;
-      });
-      console.log('outpu=======t');
-      console.log(output);
-      return output;
-  }
 
     async findOne(id: string, headers: Header): Promise<Menu | null> {
         if (!headers['time-zone']) {
