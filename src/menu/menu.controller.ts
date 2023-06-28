@@ -3,21 +3,9 @@
  * @Anthor: Telliex
  * @Date: 2023-06-12 22:27:23
  * @LastEditors: Telliex.Chiu Telliex.Chiu@ecliudvalle.com.tw
- * @LastEditTime: 2023-06-27 00:30:41
+ * @LastEditTime: 2023-06-28 05:49:51
  */
-import {
-    Controller,
-    Get,
-    Headers,
-    Query,
-    Post,
-    Body,
-    Patch,
-    Param,
-    Delete,
-    UsePipes,
-    ValidationPipe,
-} from '@nestjs/common';
+import { Controller, Get, Headers, Query, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 
 import { MenuDto, FilterParamDto, HeaderParamDto } from './dto';
 import { NavItem } from './interfaces/menu.interface';
@@ -35,13 +23,13 @@ export class MenuController {
         return this.menuService.findAll(headers, filterParam);
     }
 
-    @Get('list')
+    @Get('nav')
     async findList(
         @Headers() headers: HeaderParamDto,
         @Query() filterParam: FilterParamDto,
     ): Promise<NavItem[]> {
         // const { limit, offset } = paginationQuery;
-        return this.menuService.findList(headers, filterParam);
+        return this.menuService.findNavList(headers, filterParam);
     }
 
     // Get the menu item
@@ -57,14 +45,14 @@ export class MenuController {
         return this.menuService.remove(id, headers);
     }
 
-    // // Create the menu item
+    // Create the menu item
     @Post()
-    @UsePipes(
-        new ValidationPipe({
-            transform: true, // 將請求數據自動轉換為 DTO 對象
-            whitelist: true, // 只保留 DTO 中定義的屬性
-        }),
-    )
+    // @UsePipes(
+    //     new ValidationPipe({
+    //         transform: true, // 將請求數據自動轉換為 DTO 對象
+    //         whitelist: true, // 只保留 DTO 中定義的屬性
+    //     }),
+    // )
     create(
         @Headers() headers: HeaderParamDto,
         @Body()
@@ -75,12 +63,12 @@ export class MenuController {
 
     // cover the menu item
     @Patch(':id')
-    @UsePipes(
-        new ValidationPipe({
-            transform: true, // 將請求數據自動轉換為 DTO 對象
-            whitelist: true, // 只保留 DTO 中定義的屬性
-        }),
-    )
+    // @UsePipes(
+    //     new ValidationPipe({
+    //         transform: true, // 將請求數據自動轉換為 DTO 對象
+    //         whitelist: true, // 只保留 DTO 中定義的屬性
+    //     }),
+    // )
     update(
         @Headers() headers: HeaderParamDto,
         @Param('id') id: string,
