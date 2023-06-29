@@ -1,6 +1,14 @@
+# Everonment
+.env
+.env.*
+uploads
+config.yml
+
 # compiled output
 /dist
 /node_modules
+.history
+back
 
 # Logs
 logs

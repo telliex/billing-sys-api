@@ -5,7 +5,7 @@
  * @LastEditors: Telliex
  * @LastEditTime: 2023-06-12 06:11:05
 -->
-# ENTERNE SYSTEM API
+# Eterne SYSTEM API
 
 ## Introduction
 

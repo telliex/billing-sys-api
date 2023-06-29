@@ -2,12 +2,13 @@
   "name": "nest-learn",
   "version": "1.0.0.0",
   "description": "",
-  "author": "",
+  "author": "Telliex Chiu",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
-    "prebuild": "cross-env rimraf dist",
-    "build": "cross-env NODE_ENV=production nest build",
+    "cli": "cross-env NODE_ENV=development ts-node --files -T -P tsconfig.build.json -r tsconfig-paths/register ./src/main.ts",
+    "prebuild": "rimraf dist",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "cross-env NODE_ENV=development NODE_OPTIONS=--max-old-space-size=8192 nest start",
     "start:dev": "cross-env NODE_ENV=development nest start --watch",
@@ -50,7 +51,7 @@
     "@types/express": "^4.17.17",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.195",
-    "@types/moment": "^2.13.0",
+    "@types/moment":s "^2.13.0",
     "@types/node": "20.3.1",
     "@types/sanitize-html": "^2.9.0",
     "@types/supertest": "^2.0.12",
@@ -98,7 +99,8 @@
         "webpack"
       ],
       "allowAny": [
-        "mysql2"
+        "mysql2",
+        "@nestjs/common"
       ]
     }
   }

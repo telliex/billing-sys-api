@@ -13,10 +13,10 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'jest', 'prettier', 'import', 'unused-imports'],
   extends: [
-      // airbnb规范
+      // airbnb規範
       // https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb
       'airbnb-base',
-      // 兼容typescript的airbnb规范
+      // 兼容typescript的airbnb規範
       // https://github.com/iamturns/eslint-config-airbnb-typescript
       'airbnb-typescript/base',
 
@@ -28,10 +28,10 @@ module.exports = {
 
       // 支持jest
       'plugin:jest/recommended',
-      // 使用prettier格式化代码
+      // 使用prettier格式化代碼
       // https://github.com/prettier/eslint-config-prettier#readme
       'prettier',
-      // 整合typescript-eslint与prettier
+      // 整合typescript-eslint與prettier
       // https://github.com/prettier/eslint-plugin-prettier
       'plugin:prettier/recommended',
   ],
@@ -64,14 +64,14 @@ module.exports = {
       'import/no-named-default': 0,
       'no-restricted-exports': 0,
 
-      // 一部分文件在导入devDependencies的依赖时不报错
+      // 一部分文件在導入devDependencies的依賴時不報錯
       'import/no-extraneous-dependencies': [
           1,
           {
               devDependencies: ['**/*.test.{ts,js}', '**/*.spec.{ts,js}', './test/**.{ts,js}'],
           },
       ],
-      // 模块导入顺序规则
+      // 模塊導入順序規則
       'import/order': [
           1,
           {
@@ -87,7 +87,7 @@ module.exports = {
               warnOnUnassignedImports: true,
           },
       ],
-      // 自动删除未使用的导入
+      // 自動刪除未使用的導入
       // https://github.com/sweepline/eslint-plugin-unused-imports
       'unused-imports/no-unused-imports': 1,
       'unused-imports/no-unused-vars': [
