@@ -77,15 +77,14 @@ export class MenuService {
                 id: item.id,
                 type: item.type,
                 path: item.rout_path,
-                name: item.menu_name,
+                name: item.alias,
                 component: item.component,
-                redirect: item.rout_path,
+                redirect: item.parent_menu === '' ? item.rout_path : null,
                 parentMenu: item.parent_menu,
-                alias: item.component_name,
                 caseSensitive: true,
                 meta: {
-                    hideMenu: item.is_show === 0,
-                    title: item.menu_name,
+                    hideMenu: item.status === 0,
+                    title: item.alias,
                     hideChildrenInMenu: false,
                     icon: item.icon,
                 },
@@ -115,241 +114,242 @@ export class MenuService {
             item.redirect = `${item.path}${
                 item.children && item.children.length >= 1 ? `/${item.children[0].path}` : ''
             }`;
+            item.meta.hideChildrenInMenu = item.children && item.children.length <= 1;
         });
         console.log('menuTree:', menuTree);
 
         // single
-        // const dashboardRoute = {
-        //     path: '/dashboard',
-        //     name: 'Dashboard',
-        //     component: 'LAYOUT',
-        //     redirect: '/dashboard/analysis',
-        //     meta: {
-        //         title: 'routes.dashboard.dashboard',
-        //         hideChildrenInMenu: true,
-        //         icon: 'bx:bx-home',
-        //     },
-        //     children: [
-        //         {
-        //             path: 'analysis',
-        //             name: 'Analysis',
-        //             component: '/dashboard/analysis/index',
-        //             meta: {
-        //                 hideMenu: true,
-        //                 hideBreadcrumb: true,
-        //                 title: 'routes.dashboard.analysis',
-        //                 currentActiveMenu: '/dashboard',
-        //                 icon: 'bx:bx-home',
-        //             },
-        //         },
-        //         {
-        //             path: 'workbench',
-        //             name: 'Workbench',
-        //             component: '/dashboard/workbench/index',
-        //             meta: {
-        //                 hideMenu: true,
-        //                 hideBreadcrumb: true,
-        //                 title: 'routes.dashboard.workbench',
-        //                 currentActiveMenu: '/dashboard',
-        //                 icon: 'bx:bx-home',
-        //             },
-        //         },
-        //     ],
-        // };
+        const dashboardRoute = {
+            path: '/dashboard',
+            name: 'Dashboard',
+            component: 'LAYOUT',
+            redirect: '/dashboard/analysis',
+            meta: {
+                title: 'routes.dashboard.dashboard',
+                hideChildrenInMenu: true,
+                icon: 'bx:bx-home',
+            },
+            children: [
+                {
+                    path: 'analysis',
+                    name: 'Analysis',
+                    component: '/dashboard/analysis/index',
+                    meta: {
+                        hideMenu: true,
+                        hideBreadcrumb: true,
+                        title: 'routes.dashboard.analysis',
+                        currentActiveMenu: '/dashboard',
+                        icon: 'bx:bx-home',
+                    },
+                },
+                {
+                    path: 'workbench',
+                    name: 'Workbench',
+                    component: '/dashboard/workbench/index',
+                    meta: {
+                        hideMenu: true,
+                        hideBreadcrumb: true,
+                        title: 'routes.dashboard.workbench',
+                        currentActiveMenu: '/dashboard',
+                        icon: 'bx:bx-home',
+                    },
+                },
+            ],
+        };
 
-        // const backRoute = {
-        //     path: 'back',
-        //     name: 'PermissionBackDemo',
-        //     meta: {
-        //         title: 'routes.demo.permission.back',
-        //     },
+        const backRoute = {
+            path: 'back',
+            name: 'PermissionBackDemo',
+            meta: {
+                title: 'routes.demo.permission.back',
+            },
 
-        //     children: [
-        //         {
-        //             path: 'page',
-        //             name: 'BackAuthPage',
-        //             component: '/demo/permission/back/index',
-        //             meta: {
-        //                 title: 'routes.demo.permission.backPage',
-        //             },
-        //         },
-        //         {
-        //             path: 'btn',
-        //             name: 'BackAuthBtn',
-        //             component: '/demo/permission/back/Btn',
-        //             meta: {
-        //                 title: 'routes.demo.permission.backBtn',
-        //             },
-        //         },
-        //     ],
-        // };
+            children: [
+                {
+                    path: 'page',
+                    name: 'BackAuthPage',
+                    component: '/demo/permission/back/index',
+                    meta: {
+                        title: 'routes.demo.permission.backPage',
+                    },
+                },
+                {
+                    path: 'btn',
+                    name: 'BackAuthBtn',
+                    component: '/demo/permission/back/Btn',
+                    meta: {
+                        title: 'routes.demo.permission.backBtn',
+                    },
+                },
+            ],
+        };
 
-        // const authRoute = {
-        //     path: '/permission',
-        //     name: 'Permission',
-        //     component: 'LAYOUT',
-        //     redirect: '/permission/front/page',
-        //     meta: {
-        //         icon: 'carbon:user-role',
-        //         title: 'routes.demo.permission.permission',
-        //     },
-        //     children: [backRoute],
-        // };
+        const authRoute = {
+            path: '/permission',
+            name: 'Permission',
+            component: 'LAYOUT',
+            redirect: '/permission/front/page',
+            meta: {
+                icon: 'carbon:user-role',
+                title: 'routes.demo.permission.permission',
+            },
+            children: [backRoute],
+        };
 
-        // const levelRoute = {
-        //     path: '/level',
-        //     name: 'Level',
-        //     component: 'LAYOUT',
-        //     redirect: '/level/menu1/menu1-1',
-        //     meta: {
-        //         icon: 'carbon:user-role',
-        //         title: 'routes.demo.level.level',
-        //     },
+        const levelRoute = {
+            path: '/level',
+            name: 'Level',
+            component: 'LAYOUT',
+            redirect: '/level/menu1/menu1-1',
+            meta: {
+                icon: 'carbon:user-role',
+                title: 'routes.demo.level.level',
+            },
 
-        //     children: [
-        //         {
-        //             path: 'menu1',
-        //             name: 'Menu1Demo',
-        //             meta: {
-        //                 title: 'Menu1',
-        //             },
-        //             children: [
-        //                 {
-        //                     path: 'menu1-1',
-        //                     name: 'Menu11Demo',
-        //                     meta: {
-        //                         title: 'Menu1-1',
-        //                     },
-        //                     children: [
-        //                         {
-        //                             path: 'menu1-1-1',
-        //                             name: 'Menu111Demo',
-        //                             component: '/demo/level/Menu111',
-        //                             meta: {
-        //                                 title: 'Menu111',
-        //                             },
-        //                         },
-        //                     ],
-        //                 },
-        //                 {
-        //                     path: 'menu1-2',
-        //                     name: 'Menu12Demo',
-        //                     component: '/demo/level/Menu12',
-        //                     meta: {
-        //                         title: 'Menu1-2',
-        //                     },
-        //                 },
-        //             ],
-        //         },
-        //         {
-        //             path: 'menu2',
-        //             name: 'Menu2Demo',
-        //             component: '/demo/level/Menu2',
-        //             meta: {
-        //                 title: 'Menu2',
-        //             },
-        //         },
-        //     ],
-        // };
+            children: [
+                {
+                    path: 'menu1',
+                    name: 'Menu1Demo',
+                    meta: {
+                        title: 'Menu1',
+                    },
+                    children: [
+                        {
+                            path: 'menu1-1',
+                            name: 'Menu11Demo',
+                            meta: {
+                                title: 'Menu1-1',
+                            },
+                            children: [
+                                {
+                                    path: 'menu1-1-1',
+                                    name: 'Menu111Demo',
+                                    component: '/demo/level/Menu111',
+                                    meta: {
+                                        title: 'Menu111',
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            path: 'menu1-2',
+                            name: 'Menu12Demo',
+                            component: '/demo/level/Menu12',
+                            meta: {
+                                title: 'Menu1-2',
+                            },
+                        },
+                    ],
+                },
+                {
+                    path: 'menu2',
+                    name: 'Menu2Demo',
+                    component: '/demo/level/Menu2',
+                    meta: {
+                        title: 'Menu2',
+                    },
+                },
+            ],
+        };
 
-        // const sysRoute = {
-        //     path: '/system',
-        //     name: 'System',
-        //     component: 'LAYOUT',
-        //     redirect: '/system/account',
-        //     meta: {
-        //         icon: 'ion:settings-outline',
-        //         title: 'routes.demo.system.moduleName',
-        //     },
-        //     children: [
-        //         {
-        //             path: 'account',
-        //             name: 'AccountManagement',
-        //             meta: {
-        //                 title: 'routes.demo.system.account',
-        //                 ignoreKeepAlive: true,
-        //             },
-        //             component: '/demo/system/account/index',
-        //         },
-        //         {
-        //             path: 'account_detail/:id',
-        //             name: 'AccountDetail',
-        //             meta: {
-        //                 hideMenu: true,
-        //                 title: 'routes.demo.system.account_detail',
-        //                 ignoreKeepAlive: true,
-        //                 showMenu: false,
-        //                 currentActiveMenu: '/system/account',
-        //             },
-        //             component: '/demo/system/account/AccountDetail',
-        //         },
-        //         {
-        //             path: 'role',
-        //             name: 'RoleManagement',
-        //             meta: {
-        //                 title: 'routes.demo.system.role',
-        //                 ignoreKeepAlive: true,
-        //             },
-        //             component: '/demo/system/role/index',
-        //         },
+        const sysRoute = {
+            path: '/system',
+            name: 'System',
+            component: 'LAYOUT',
+            redirect: '/system/account',
+            meta: {
+                icon: 'ion:settings-outline',
+                title: 'routes.demo.system.moduleName',
+            },
+            children: [
+                {
+                    path: 'account',
+                    name: 'AccountManagement',
+                    meta: {
+                        title: 'routes.demo.system.account',
+                        ignoreKeepAlive: true,
+                    },
+                    component: '/demo/system/account/index',
+                },
+                {
+                    path: 'account_detail/:id',
+                    name: 'AccountDetail',
+                    meta: {
+                        hideMenu: true,
+                        title: 'routes.demo.system.account_detail',
+                        ignoreKeepAlive: true,
+                        showMenu: false,
+                        currentActiveMenu: '/system/account',
+                    },
+                    component: '/demo/system/account/AccountDetail',
+                },
+                {
+                    path: 'role',
+                    name: 'RoleManagement',
+                    meta: {
+                        title: 'routes.demo.system.role',
+                        ignoreKeepAlive: true,
+                    },
+                    component: '/demo/system/role/index',
+                },
 
-        //         {
-        //             path: 'menu',
-        //             name: 'MenuManagement',
-        //             meta: {
-        //                 title: 'routes.demo.system.menu',
-        //                 ignoreKeepAlive: true,
-        //             },
-        //             component: '/demo/system/menu/index',
-        //         },
-        //         {
-        //             path: 'dept',
-        //             name: 'DeptManagement',
-        //             meta: {
-        //                 title: 'routes.demo.system.dept',
-        //                 ignoreKeepAlive: true,
-        //             },
-        //             component: '/demo/system/dept/index',
-        //         },
-        //         {
-        //             path: 'changePassword',
-        //             name: 'ChangePassword',
-        //             meta: {
-        //                 title: 'routes.demo.system.password',
-        //                 ignoreKeepAlive: true,
-        //             },
-        //             component: '/demo/system/password/index',
-        //         },
-        //     ],
-        // };
+                {
+                    path: 'menu',
+                    name: 'MenuManagement',
+                    meta: {
+                        title: 'routes.demo.system.menu',
+                        ignoreKeepAlive: true,
+                    },
+                    component: '/sys/menu/index',
+                },
+                {
+                    path: 'dept',
+                    name: 'DeptManagement',
+                    meta: {
+                        title: 'routes.demo.system.dept',
+                        ignoreKeepAlive: true,
+                    },
+                    component: '/demo/system/dept/index',
+                },
+                {
+                    path: 'changePassword',
+                    name: 'ChangePassword',
+                    meta: {
+                        title: 'routes.demo.system.password',
+                        ignoreKeepAlive: true,
+                    },
+                    component: '/demo/system/password/index',
+                },
+            ],
+        };
 
-        // const linkRoute = {
-        //     path: '/link',
-        //     name: 'Link',
-        //     component: 'LAYOUT',
-        //     meta: {
-        //         icon: 'ion:tv-outline',
-        //         title: 'routes.demo.iframe.frame',
-        //     },
-        //     children: [
-        //         {
-        //             path: 'doc',
-        //             name: 'Doc',
-        //             meta: {
-        //                 title: 'routes.demo.iframe.doc',
-        //                 frameSrc: 'https://doc.vvbin.cn/',
-        //             },
-        //         },
-        //         {
-        //             path: 'https://doc.vvbin.cn/',
-        //             name: 'DocExternal',
-        //             component: 'LAYOUT',
-        //             meta: {
-        //                 title: 'routes.demo.iframe.docExternal',
-        //             },
-        //         },
-        //     ],
-        // };
+        const linkRoute = {
+            path: '/link',
+            name: 'Link',
+            component: 'LAYOUT',
+            meta: {
+                icon: 'ion:tv-outline',
+                title: 'routes.demo.iframe.frame',
+            },
+            children: [
+                {
+                    path: 'doc',
+                    name: 'Doc',
+                    meta: {
+                        title: 'routes.demo.iframe.doc',
+                        frameSrc: 'https://doc.vvbin.cn/',
+                    },
+                },
+                {
+                    path: 'https://doc.vvbin.cn/',
+                    name: 'DocExternal',
+                    component: 'LAYOUT',
+                    meta: {
+                        title: 'routes.demo.iframe.docExternal',
+                    },
+                },
+            ],
+        };
 
         // let output: any[] = await this.menuRepository.find({
         //     where: {
@@ -368,7 +368,10 @@ export class MenuService {
         // });
         // console.log('outpu=======t');
         // console.log(output);
+        console.log('menu:', [dashboardRoute, authRoute, levelRoute, sysRoute, linkRoute]);
         return menuTree;
+
+        // return [dashboardRoute, authRoute, levelRoute, sysRoute, linkRoute];
     }
 
     async findAll(headers: Header, query: any): Promise<Menu[]> {

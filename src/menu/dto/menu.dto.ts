@@ -31,6 +31,15 @@ export class MenuDto {
 
     @IsString()
     @MaxLength(255, {
+        message: 'Menu name content max length is 255',
+    })
+    @IsNotEmpty({ message: 'type required' })
+    @Expose({ name: 'menu_name' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
+    alias: string;
+
+    @IsString()
+    @MaxLength(255, {
         message: 'Description content max length is 255',
     })
     description: string;

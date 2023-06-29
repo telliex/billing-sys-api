@@ -25,6 +25,9 @@ export class Menu {
     @Column({ comment: 'menu name', type: 'varchar', width: 255, nullable: false })
     menu_name: string;
 
+    @Column({ comment: 'menu name', type: 'varchar', width: 255, nullable: false })
+    alias: string;
+
     @Column({ comment: 'description', type: 'varchar', width: 255, default: '', nullable: true })
     description: string;
 

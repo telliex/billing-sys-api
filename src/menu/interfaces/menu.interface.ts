@@ -24,6 +24,7 @@ export interface CamelTypeMenuItem {
     id: string;
     type: string;
     menuName: string;
+    alias: string;
     description: string;
     permission: string;
     component: string;
@@ -46,6 +47,7 @@ export interface Menu {
     id: string;
     type: string;
     menuName: string;
+    alias: string;
     description: string;
     permission: string;
     component: string;
