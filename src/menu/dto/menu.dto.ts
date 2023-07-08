@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Transform, Expose } from 'class-transformer';
-import { IsNotEmpty, MaxLength, IsNumber, IsString, Max, Min, IsOptional } from 'class-validator';
+import { IsNotEmpty, MaxLength, IsInt, IsString, Max, Min, IsOptional } from 'class-validator';
 
 // import { snakeCase } from 'lodash';
 
@@ -75,7 +75,7 @@ export class MenuDto {
     @Transform(({ value }) => value, { toPlainOnly: true })
     routPath: string;
 
-    @IsNumber()
+    @IsInt()
     @IsNotEmpty({ message: 'order No required' })
     @Min(0)
     @Max(10000)
@@ -94,26 +94,26 @@ export class MenuDto {
     @Transform(({ value }) => value, { toPlainOnly: true })
     parentMenu: string;
 
-    @IsNumber()
+    @IsInt()
     @Expose({ name: 'is_ext' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     isExt: number;
 
-    @IsNumber()
+    @IsInt()
     @Expose({ name: 'is_cache' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     isCache: number;
 
-    @IsNumber()
+    @IsInt()
     @Expose({ name: 'is_show' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     isShow: number;
 
-    @IsNumber()
+    @IsInt()
     @IsNotEmpty({ message: 'user required' })
     status: number;
 
-    @IsNumber()
+    @IsInt()
     @IsNotEmpty({ groups: ['update'], message: 'user required' })
     @Expose({ name: 'add_master' })
     @Transform(({ value }) => value, { toPlainOnly: true })
@@ -125,7 +125,7 @@ export class MenuDto {
     @Transform(({ value }) => value, { toPlainOnly: true })
     addTime: string;
 
-    @IsNumber()
+    @IsInt()
     @Expose({ name: 'change_master' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     changeMaster: number;
@@ -141,7 +141,7 @@ export class FilterParamDto {
     @IsOptional()
     menuName: string;
 
-    @IsNumber()
+    @IsInt()
     @IsOptional()
     status: number;
 }

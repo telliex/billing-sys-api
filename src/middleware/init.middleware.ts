@@ -1,10 +1,10 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 @Injectable()
 export class InitMiddleware implements NestMiddleware {
-  use(req: any, res: any, next: () => void) {
-    console.log(Date());
-    console.log('req', req.body);
-    next();
-  }
+    use(req: FastifyRequest['raw'], res: FastifyReply['raw'], next: () => void) {
+        console.log(Date());
+        next();
+    }
 }

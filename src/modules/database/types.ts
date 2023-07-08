@@ -7,46 +7,46 @@ export type QueryHook<Entity> = (
 ) => Promise<SelectQueryBuilder<Entity>>;
 
 /**
- * 分页原数据
+ * 分頁原數據
  */
 export interface PaginateMeta {
     /**
-     * 当前页项目数量
+     * 當前頁項目數量
      */
     itemCount: number;
     /**
-     * 项目总数量
+     * 項目總數量
      */
     totalItems?: number;
     /**
-     * 每页显示数量
+     * 每頁顯示數量
      */
     perPage: number;
     /**
-     * 总页数
+     * 總頁數
      */
     totalPages?: number;
     /**
-     * 当前页数
+     * 當前頁數
      */
     currentPage: number;
 }
 /**
- * 分页选项
+ * 分頁選項
  */
 export interface PaginateOptions {
     /**
-     * 当前页数
+     * 當前頁數
      */
     page: number;
     /**
-     * 每页显示数量
+     * 每頁顯示數量
      */
     limit: number;
 }
 
 /**
- * 分页返回数据
+ * 分頁返回數據
  */
 export interface PaginateReturn<E extends ObjectLiteral> {
     meta: PaginateMeta;

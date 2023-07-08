@@ -2,10 +2,13 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 export const database = (): TypeOrmModuleOptions => ({
     type: 'mysql',
-    host: 'billing-dev-db.c3zkaaiu8aye.us-west-2.rds.amazonaws.com',
+    // host: 'billing-dev-db.c3zkaaiu8aye.us-west-2.rds.amazonaws.com',
+    // username: 'telliex.chiu',
+    // password: 'zA#L2xetEcMu!o3^',
+    host: '127.0.0.1',
+    username: 'root',
+    password: 'tornado123',
     port: 3306,
-    username: 'telliex.chiu',
-    password: 'zA#L2xetEcMu!o3^',
     database: 'ecloud',
     retryAttempts: 10,
     retryDelay: 3000,

@@ -44,26 +44,26 @@ export interface CamelTypeMenuItem {
 }
 
 export interface Menu {
-    id: string;
-    type: string;
-    menuName: string;
-    alias: string;
-    description: string;
-    permission: string;
-    component: string;
-    componentName: string;
-    routPath: string;
-    orderNo: number;
-    icon: string;
-    parentMenu: string;
-    isExt: number;
-    isCache: number;
-    isShow: number;
-    status: number;
-    addMaster: number;
-    addTime: string;
-    changeMaster: number;
-    changeTime: string;
+    readonly id: string;
+    readonly type: string;
+    readonly menuName: string;
+    readonly alias: string;
+    readonly description: string;
+    readonly permission: string;
+    readonly component: string;
+    readonly componentName: string;
+    readonly routPath: string;
+    readonly orderNo: number;
+    readonly icon: string;
+    readonly parentMenu: string;
+    readonly isExt: number;
+    readonly isCache: number;
+    readonly isShow: number;
+    readonly status: number;
+    readonly addMaster: number;
+    readonly addTime: string;
+    readonly changeMaster: number;
+    readonly changeTime: string;
 }
 
 export interface MetaItem {

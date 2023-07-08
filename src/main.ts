@@ -1,13 +1,6 @@
-import { join } from 'path';
-
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { useContainer } from 'class-validator';
-// import * as cors from 'cors';
-// import {
-//   FastifyAdapter,
-//   NestFastifyApplication,
-// } from '@nestjs/platform-fastify';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+// import { NestExpressApplication } from '@nestjs/platform-express';
 
 // 为了在使用class-validator的DTO类中也可以注入nestjs容器的依赖，需要在main.ts中添加如下代码：
 
@@ -19,15 +12,17 @@ function MiddleWareToAll(res: any, req: any, next: any) {
 }
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
-    app.useStaticAssets(join(__dirname, '..', 'public'), { prefix: '/static/' }); // static folder
-    app.setBaseViewsDir(join(__dirname, '..', 'views')); // views folder
-    app.setViewEngine('hbs'); // view engine
+    const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
+        logger: ['warn'],
+    });
+    // app.useStaticAssets(join(__dirname, '..', 'public'), { prefix: '/static/' }); // static folder
+    // app.setBaseViewsDir(join(__dirname, '..', 'views')); // views folder
+    // app.setViewEngine('hbs'); // view engine
     // app.setGlobalPrefix('api/v1.0'); // global prefix
     app.use(MiddleWareToAll); // global middleware
-    // app.use(cors); // cors
-
-    useContainer(app.select(AppModule), { fallbackOnErrors: true });
-    await app.listen(5000, '0.0.0.0');
+    app.enableCors(); // cors
+    // useContainer(app.select(AppModule), { fallbackOnErrors: true });
+    await app.listen(7878, '0.0.0.0');
+    console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

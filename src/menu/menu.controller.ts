@@ -1,10 +1,3 @@
-/*
- * @Description:
- * @Anthor: Telliex
- * @Date: 2023-06-12 22:27:23
- * @LastEditors: Telliex.Chiu Telliex.Chiu@ecliudvalle.com.tw
- * @LastEditTime: 2023-06-28 05:49:51
- */
 import { Controller, Get, Headers, Query, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 
 import { MenuDto, FilterParamDto, HeaderParamDto } from './dto';
@@ -16,6 +9,23 @@ export class MenuController {
     constructor(private readonly menuService: MenuService) {}
 
     // constructor() {@InjectRepository(Menu) private readonly menuRepository: Repository<Menu>}
+
+    // Create the menu item
+    @Post()
+    // @UsePipes(
+    //     new ValidationPipe({
+    //         transform: true, // 將請求數據自動轉換為 DTO 對象
+    //         whitelist: true, // 只保留 DTO 中定義的屬性
+    //     }),
+    // )
+    async create(
+        @Headers() headers: HeaderParamDto,
+        @Body()
+        createMenuDto: MenuDto,
+    ): Promise<MenuDto> {
+        return this.menuService.create(createMenuDto, headers);
+    }
+
     // List the menu list
     @Get()
     async findAll(@Headers() headers: HeaderParamDto, @Query() filterParam: FilterParamDto) {
@@ -45,22 +55,6 @@ export class MenuController {
         return this.menuService.remove(id, headers);
     }
 
-    // Create the menu item
-    @Post()
-    // @UsePipes(
-    //     new ValidationPipe({
-    //         transform: true, // 將請求數據自動轉換為 DTO 對象
-    //         whitelist: true, // 只保留 DTO 中定義的屬性
-    //     }),
-    // )
-    create(
-        @Headers() headers: HeaderParamDto,
-        @Body()
-        createMenuDto: MenuDto,
-    ): Promise<MenuDto> {
-        return this.menuService.create(createMenuDto, headers);
-    }
-
     // cover the menu item
     @Patch(':id')
     // @UsePipes(
@@ -69,7 +63,7 @@ export class MenuController {
     //         whitelist: true, // 只保留 DTO 中定義的屬性
     //     }),
     // )
-    update(
+    async update(
         @Headers() headers: HeaderParamDto,
         @Param('id') id: string,
         @Body()

@@ -7,16 +7,11 @@ import { MenuModule } from './menu/menu.module';
 import { InitMiddleware } from './middleware/init.middleware';
 import { DatabaseModule } from './modules/database/database.module';
 
-// import { CoreModule } from './core/core.module';
-import { AuthModule } from './modules/auth/auth.module';
-
-
 @Module({
     imports: [
         // CoreModule.forRoot(database()),
         DatabaseModule.forRoot(database),
         MenuModule,
-        AuthModule,
     ],
     controllers: [AppController, KeepaliveController],
     providers: [],
