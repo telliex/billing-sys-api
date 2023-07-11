@@ -1,18 +1,21 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { snakeCase, camelCase, isNil } from 'lodash';
+import { isNil } from 'lodash';
 import moment from 'moment';
 import { Repository } from 'typeorm';
 
-import { PaginateOptions, QueryHook } from '../modules/database/types';
+import { PaginateOptions, QueryHook } from '../database/types';
+import { HeaderParamDto } from '../restful/dto';
 
-import { Menu } from './entity/menu.entity';
-import { NavItem, SnakeTypeMenuItem, CamelTypeMenuItem } from './interfaces/menu.interface';
+import {
+    offsetUtCTime,
+    camelCaseToSnakeCase,
+    snakeCaseToCamelCase,
+    checkHeaders,
+} from '../restful/helpers';
 
-interface Header {
-    'user-id': number;
-    'time-zone': string;
-}
+import { Menu } from './entities/menu.entity';
+import { NavItem, CamelTypeMenuItem } from './interfaces/menu.interface';
 
 @Injectable()
 export class MenuService {
@@ -20,31 +23,6 @@ export class MenuService {
         @InjectRepository(Menu)
         private menuRepository: Repository<Menu>,
     ) {}
-
-    camelCaseToSnakeCase(targetMenu: CamelTypeMenuItem): SnakeTypeMenuItem {
-        const snakeTypeMenu = Object.keys(targetMenu).reduce((acc, key) => {
-            const wantKey = snakeCase(key) as keyof SnakeTypeMenuItem;
-            // @ts-ignore
-            acc[wantKey] = targetMenu[key] as SnakeTypeMenuItem[keyof SnakeTypeMenuItem];
-            return acc;
-        }, {} as SnakeTypeMenuItem);
-
-        return snakeTypeMenu;
-    }
-
-    snakeCaseToCamelCase(targetMenu: SnakeTypeMenuItem): CamelTypeMenuItem {
-        return Object.keys(targetMenu).reduce((acc, key) => {
-            const wantKey = camelCase(key) as keyof CamelTypeMenuItem;
-            // @ts-ignore
-            acc[wantKey] = targetMenu[key] as CamelTypeMenuItem[keyof CamelTypeMenuItem];
-            return acc;
-        }, {} as CamelTypeMenuItem);
-    }
-
-    offsetUtCTime(time: string, timeZone: string) {
-        const offsetTime = Number(timeZone.split('UTC')[1]);
-        return moment(time).add(offsetTime, 'hours').format('YYYY-MM-DD HH:mm:ss');
-    }
 
     async paginate(options: PaginateOptions, callback?: QueryHook<Menu>) {
         //
@@ -54,13 +32,8 @@ export class MenuService {
         //
     }
 
-    async findNavList(headers: Header, query: any): Promise<NavItem[]> {
-        if (!headers['time-zone']) {
-            throw new BadRequestException(`Missing UTC header.`);
-        }
-        if (!headers['user-id']) {
-            throw new BadRequestException(`Missing user id header.`);
-        }
+    async findNavList(headers: HeaderParamDto, query: any): Promise<NavItem[]> {
+        checkHeaders(headers);
 
         const temp: any[] = await this.menuRepository.find({
             where: {
@@ -361,9 +334,9 @@ export class MenuService {
         //     },
         // });
         // output = output.map((item) => {
-        //     const temp: any = this.snakeCaseToCamelCase(item);
-        //     temp.changeTime ? this.offsetUtCTime(temp.changeTime, headers['time-zone']) : '';
-        //     temp.addTime ? this.offsetUtCTime(temp.addTime, headers['time-zone']) : '';
+        //     const temp: any = snakeCaseToCamelCase(item);
+        //     temp.changeTime ? offsetUtCTime(temp.changeTime, headers['time-zone']) : '';
+        //     temp.addTime ? offsetUtCTime(temp.addTime, headers['time-zone']) : '';
         //     return temp;
         // });
         // console.log('outpu=======t');
@@ -374,13 +347,8 @@ export class MenuService {
         // return [dashboardRoute, authRoute, levelRoute, sysRoute, linkRoute];
     }
 
-    async findAll(headers: Header, query: any): Promise<Menu[]> {
-        if (!headers['time-zone']) {
-            throw new BadRequestException(`Missing UTC header.`);
-        }
-        if (!headers['user-id']) {
-            throw new BadRequestException(`Missing user id header.`);
-        }
+    async findAll(headers: HeaderParamDto, query: any): Promise<Menu[]> {
+        checkHeaders(headers);
 
         let output: any[] = await this.menuRepository.find({
             where: {
@@ -392,9 +360,9 @@ export class MenuService {
             },
         });
         output = output.map((item) => {
-            const temp: any = this.snakeCaseToCamelCase(item);
-            temp.changeTime ? this.offsetUtCTime(temp.changeTime, headers['time-zone']) : '';
-            temp.addTime ? this.offsetUtCTime(temp.addTime, headers['time-zone']) : '';
+            const temp: any = snakeCaseToCamelCase(item);
+            temp.changeTime ? offsetUtCTime(temp.changeTime, headers['time-zone']) : '';
+            temp.addTime ? offsetUtCTime(temp.addTime, headers['time-zone']) : '';
             return temp;
         });
         console.log('output=======');
@@ -402,67 +370,47 @@ export class MenuService {
         return output;
     }
 
-    async findOne(id: string, headers: Header): Promise<Menu | null> {
-        if (!headers['time-zone']) {
-            throw new BadRequestException(`Missing UTC header.`);
-        }
-        if (!headers['user-id']) {
-            throw new BadRequestException(`Missing user id header.`);
-        }
+    async findOne(id: string, headers: HeaderParamDto): Promise<Menu | null> {
+        checkHeaders(headers);
+
         const targetMenu = await this.menuRepository.findOneBy({ id });
         if (isNil(targetMenu)) {
             throw new NotFoundException(`The menu #${id} is not found.`);
         }
-        const output: any = this.snakeCaseToCamelCase(targetMenu);
+        const output: any = snakeCaseToCamelCase(targetMenu);
         output.changeTime = output.changeTime
-            ? this.offsetUtCTime(output.changeTime, headers['time-zone'])
+            ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
-        output.addTime = output.addTime
-            ? this.offsetUtCTime(output.addTime, headers['time-zone'])
-            : '';
+        output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
         return output;
     }
 
     // remove menu item
-    async remove(id: string, headers: Header): Promise<CamelTypeMenuItem | null> {
-        if (!headers['time-zone']) {
-            throw new BadRequestException(`Missing UTC header.`);
-        }
-        if (!headers['user-id']) {
-            throw new BadRequestException(`Missing user id header.`);
-        }
+    async remove(id: string, headers: HeaderParamDto): Promise<CamelTypeMenuItem | null> {
+        checkHeaders(headers);
         const targetMenu = await this.menuRepository.findOneBy({ id });
 
         if (!targetMenu) {
             throw new NotFoundException(`The menu #${id} is not found.`);
         }
         // transform to camelCase
-        const output: CamelTypeMenuItem = this.snakeCaseToCamelCase(
+        const output: CamelTypeMenuItem = snakeCaseToCamelCase(
             await this.menuRepository.remove(targetMenu),
         ) as CamelTypeMenuItem;
 
         output.changeTime = output.changeTime
-            ? this.offsetUtCTime(output.changeTime, headers['time-zone'])
+            ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
-        output.addTime = output.addTime
-            ? this.offsetUtCTime(output.addTime, headers['time-zone'])
-            : '';
+        output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
         return output;
     }
 
-    async create(menuItem: CamelTypeMenuItem, headers: Header): Promise<CamelTypeMenuItem> {
-        if (!headers['time-zone']) {
-            throw new BadRequestException(`Missing UTC header.`);
-        }
-        if (!headers['user-id']) {
-            throw new BadRequestException(`Missing user id header.`);
-        }
-        console.log('menuItem1:', menuItem);
-        console.log('menuItem2:', this.camelCaseToSnakeCase(menuItem));
+    async create(menuItem: CamelTypeMenuItem, headers: HeaderParamDto): Promise<CamelTypeMenuItem> {
+        checkHeaders(headers);
 
         const newMenuItem = Object.assign(
             this.menuRepository.create(),
-            this.camelCaseToSnakeCase(menuItem),
+            camelCaseToSnakeCase(menuItem),
         );
 
         const user = Number(headers['user-id']);
@@ -475,16 +423,14 @@ export class MenuService {
         newMenuItem.change_master = user;
         newMenuItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         console.log('newMenuItem:', newMenuItem);
-        const output: CamelTypeMenuItem = this.snakeCaseToCamelCase(
+        const output: CamelTypeMenuItem = snakeCaseToCamelCase(
             await this.menuRepository.save(newMenuItem),
         ) as unknown as CamelTypeMenuItem;
 
         output.changeTime = output.changeTime
-            ? this.offsetUtCTime(output.changeTime, headers['time-zone'])
+            ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
-        output.addTime = output.addTime
-            ? this.offsetUtCTime(output.addTime, headers['time-zone'])
-            : '';
+        output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
         console.log('output:', output);
         return output;
     }
@@ -492,14 +438,9 @@ export class MenuService {
     async update(
         id: string,
         updateMenu: CamelTypeMenuItem,
-        headers: Header,
+        headers: HeaderParamDto,
     ): Promise<CamelTypeMenuItem> {
-        if (!headers['time-zone']) {
-            throw new BadRequestException(`Missing UTC header.`);
-        }
-        if (!headers['user-id']) {
-            throw new BadRequestException(`Missing user id header.`);
-        }
+        checkHeaders(headers);
         const targetMenu = await this.menuRepository.findOneBy({ id });
 
         const user = Number(headers['user-id']);
@@ -510,7 +451,7 @@ export class MenuService {
             throw new NotFoundException(`The menu #${id} is not found.`);
         }
 
-        const updateMenuTemp = Object.assign(targetMenu, this.camelCaseToSnakeCase(updateMenu));
+        const updateMenuTemp = Object.assign(targetMenu, camelCaseToSnakeCase(updateMenu));
 
         // for (const key in updateMenuTemp) {
         //     if (key !== 'id') {
@@ -524,13 +465,13 @@ export class MenuService {
 
         console.log('updateMenuTemp:', updateMenuTemp);
 
-        const output = this.snakeCaseToCamelCase(await this.menuRepository.save(updateMenuTemp));
+        const output = snakeCaseToCamelCase(
+            await this.menuRepository.save(updateMenuTemp),
+        ) as CamelTypeMenuItem;
         output.changeTime = output.changeTime
-            ? this.offsetUtCTime(output.changeTime, headers['time-zone'])
+            ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
-        output.addTime = output.addTime
-            ? this.offsetUtCTime(output.addTime, headers['time-zone'])
-            : '';
+        output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
         return output;
     }
 }

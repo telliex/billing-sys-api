@@ -145,12 +145,3 @@ export class FilterParamDto {
     @IsOptional()
     status: number;
 }
-export class HeaderParamDto {
-    @IsString()
-    @IsNotEmpty({ message: 'user id required' })
-    'user-id': number;
-
-    @IsString()
-    @IsNotEmpty({ message: 'time zine required' })
-    'time-zone': string;
-}

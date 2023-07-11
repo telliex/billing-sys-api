@@ -1,6 +1,8 @@
 import { Controller, Get, Headers, Query, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 
-import { MenuDto, FilterParamDto, HeaderParamDto } from './dto';
+import { HeaderParamDto } from '../restful/dto';
+
+import { MenuDto, FilterParamDto } from './dto';
 import { NavItem } from './interfaces/menu.interface';
 import { MenuService } from './menu.service';
 
@@ -49,12 +51,6 @@ export class MenuController {
         return this.menuService.findOne(id, headers);
     }
 
-    // Delete the menu item
-    @Delete(':id')
-    async remove(@Headers() headers: HeaderParamDto, @Param('id') id: string): Promise<MenuDto> {
-        return this.menuService.remove(id, headers);
-    }
-
     // cover the menu item
     @Patch(':id')
     // @UsePipes(
@@ -70,5 +66,11 @@ export class MenuController {
         updateMenuDto: MenuDto,
     ): Promise<MenuDto> {
         return this.menuService.update(id, updateMenuDto, headers);
+    }
+
+    // Delete the menu item
+    @Delete(':id')
+    async remove(@Headers() headers: HeaderParamDto, @Param('id') id: string): Promise<MenuDto> {
+        return this.menuService.remove(id, headers);
     }
 }
