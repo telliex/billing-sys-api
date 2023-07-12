@@ -34,6 +34,16 @@ export class RoleController {
         return this.roleService.update(id, updateRoleDto, headers);
     }
 
+    @Patch('status/:id')
+    async setRoleStatus(
+        @Headers() headers: HeaderParamDto,
+        @Param('id') id: string,
+        @Body('status') status: number,
+    ) {
+        console.log('status:', status);
+        return this.roleService.setRoleStatus(id, status, headers);
+    }
+
     @Delete(':id')
     async remove(@Headers() headers: HeaderParamDto, @Param('id') id: string) {
         return this.roleService.remove(id, headers);

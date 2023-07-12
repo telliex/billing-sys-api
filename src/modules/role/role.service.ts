@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isNil } from 'lodash';
 import moment from 'moment';
 import { Repository } from 'typeorm';
 
@@ -76,13 +77,71 @@ export class RoleService {
         return `This action returns a #${id} role`;
     }
 
-    update(id: string, updateRoleDto: RoleDto, headers: HeaderParamDto) {
+    async update(id: string, updateRoleDto: RoleDto, headers: HeaderParamDto) {
         checkHeaders(headers);
-        return `This action updates a #${id} role`;
+        const target = await this.roleRepository.findOneBy({ id });
+
+        const user = Number(headers['user-id']);
+
+        if (isNil(target)) {
+            throw new NotFoundException(`The role #${id} is not found.`);
+        }
+
+        const updateRoleTemp = Object.assign(target, camelCaseToSnakeCase(updateRoleDto));
+
+        updateRoleTemp.change_master = user;
+        updateRoleTemp.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+
+        const output = snakeCaseToCamelCase(
+            await this.roleRepository.save(updateRoleTemp),
+        ) as CamelTypeRoleItem;
+        output.changeTime = output.changeTime
+            ? offsetUtCTime(output.changeTime, headers['time-zone'])
+            : '';
+        output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
+        return output;
     }
 
-    remove(id: string, headers: HeaderParamDto) {
+    async setRoleStatus(id: string, status: number, headers: HeaderParamDto) {
         checkHeaders(headers);
-        return `This action removes a #${id} role`;
+        const target = await this.roleRepository.findOneBy({ id });
+        // const user = Number(headers['user-id']);
+
+        if (isNil(target)) {
+            throw new NotFoundException(`The role #${id} is not found.`);
+        }
+        console.log('target:', target);
+
+        target.status = status;
+        // target.change_master = user;
+        target.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+
+        const output = snakeCaseToCamelCase(
+            await this.roleRepository.save(target),
+        ) as CamelTypeRoleItem;
+        output.changeTime = output.changeTime
+            ? offsetUtCTime(output.changeTime, headers['time-zone'])
+            : '';
+        output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
+        return output;
+    }
+
+    async remove(id: string, headers: HeaderParamDto) {
+        checkHeaders(headers);
+
+        const target = await this.roleRepository.findOneBy({ id });
+        if (!target) {
+            throw new NotFoundException(`The menu #${id} is not found.`);
+        }
+        // transform to camelCase
+        const output: CamelTypeRoleItem = snakeCaseToCamelCase(
+            await this.roleRepository.remove(target),
+        ) as CamelTypeRoleItem;
+
+        output.changeTime = output.changeTime
+            ? offsetUtCTime(output.changeTime, headers['time-zone'])
+            : '';
+        output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
+        return output;
     }
 }
