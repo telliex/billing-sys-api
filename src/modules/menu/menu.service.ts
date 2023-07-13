@@ -82,6 +82,39 @@ export class MenuService {
             }
         });
         console.log('result2:', result);
+
+        const home = {
+            id: '323ef5b1-e92e-467d-bef2-fc8e86eb3a04',
+            type: 'catalog',
+            path: '/home',
+            name: 'Home',
+            component: 'LAYOUT',
+            redirect: '/home/index',
+            parentMenu: '',
+            caseSensitive: true,
+            meta: {
+                hideMenu: true,
+                title: 'Home',
+                hideChildrenInMenu: true,
+                icon: 'bx:bx-home',
+                orderNo: 100,
+            },
+            children: [
+                {
+                    id: 'b4c5d583-310d-4c27-b0b2-62303eab613d',
+                    type: 'page',
+                    path: 'index',
+                    name: 'HomePage',
+                    component: '/frontpage/index',
+                    parentMenu: '323ef5b1-e92e-467d-bef2-fc8e86eb3a04',
+                    meta: {
+                        hideMenu: true,
+                        hideBreadcrumb: true,
+                        title: 'home',
+                    },
+                },
+            ],
+        };
         const menuTree = result.filter((item) => item.parentMenu === '' && item.type === 'catalog');
         menuTree.forEach((item) => {
             item.redirect = `${item.path}${
@@ -89,6 +122,7 @@ export class MenuService {
             }`;
             item.meta.hideChildrenInMenu = item.children && item.children.length <= 1;
         });
+        menuTree.unshift(home);
         console.log('menuTree:', menuTree);
 
         // single
