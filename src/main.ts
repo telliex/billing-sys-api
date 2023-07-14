@@ -22,7 +22,7 @@ async function bootstrap() {
     app.use(MiddleWareToAll); // global middleware
     app.enableCors(); // cors
     // useContainer(app.select(AppModule), { fallbackOnErrors: true });
-    await app.listen(7878, '0.0.0.0');
+    await app.listen(5000, '0.0.0.0');
     console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();
