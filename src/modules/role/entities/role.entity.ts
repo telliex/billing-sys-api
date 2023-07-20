@@ -2,9 +2,12 @@ import {
     Entity,
     Column,
     PrimaryGeneratedColumn,
+    ManyToOne,
     // UpdateDateColumn,
     // CreateDateColumn,
 } from 'typeorm';
+
+import { User } from '../../user/entities/user.entity';
 
 @Entity('bill_system_role')
 export class Role {
@@ -46,4 +49,7 @@ export class Role {
 
     @Column('datetime')
     change_time: string;
+
+    @ManyToOne((type) => User, (user) => user.roles)
+    user: User;
 }

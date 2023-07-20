@@ -1,24 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { Transform, Expose } from 'class-transformer';
-import { IsNotEmpty, MaxLength, IsInt, IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, MaxLength, IsInt, IsString, Max, Min, IsOptional } from 'class-validator';
 
 // import { snakeCase } from 'lodash';
 
 @Injectable()
-export class RoleDto {
+export class DepartmentDto {
     @IsString()
-    @IsNotEmpty({ groups: ['update'], message: 'id required' })
+    @IsNotEmpty({ groups: ['update'], message: 'depr id required' })
     id: string;
 
-    @IsNotEmpty({ message: 'role name required' })
-    @Expose({ name: 'role_name' })
+    @IsString()
+    @MaxLength(255, {
+        message: 'Menu name content max length is 255',
+    })
+    @IsNotEmpty({ message: 'type required' })
+    @Expose({ name: 'dept_name' })
     @Transform(({ value }) => value, { toPlainOnly: true })
-    roleName: string;
+    deptName: string;
 
-    @IsNotEmpty({ message: 'role value required' })
-    @Expose({ name: 'role_value' })
+    @IsInt()
+    @IsNotEmpty({ message: 'order No required' })
+    @Min(0)
+    @Max(10000)
+    @Expose({ name: 'order_no' })
     @Transform(({ value }) => value, { toPlainOnly: true })
-    roleValue: string;
+    orderNo: number;
+
+    @IsString()
+    @Expose({ name: 'parent_dept' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
+    parentDept: string;
 
     @IsString()
     @MaxLength(255, {
@@ -26,13 +38,8 @@ export class RoleDto {
     })
     remark: string;
 
-    @IsString()
-    @MaxLength(100, {
-        message: 'Permission string max length is 100',
-    })
-    menuPermission: string;
-
     @IsInt()
+    @IsNotEmpty({ message: 'status required' })
     status: number;
 
     @IsInt()
@@ -61,7 +68,7 @@ export class RoleDto {
 export class FilterParamDto {
     @IsString()
     @IsOptional()
-    roleName: string;
+    deptName: string;
 
     @IsInt()
     @IsOptional()

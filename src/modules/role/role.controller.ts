@@ -11,13 +11,13 @@ export class RoleController {
     constructor(private readonly roleService: RoleService) {}
 
     @Post()
-    async create(@Headers() headers: HeaderParamDto, @Body() createRoleDto: RoleDto) {
-        return this.roleService.create(createRoleDto, headers);
+    async create(@Headers() headers: HeaderParamDto, @Body() createDto: RoleDto) {
+        return this.roleService.create(createDto, headers);
     }
 
     @Get()
     findAll(@Headers() headers: HeaderParamDto, @Query() filterParam: FilterParamDto) {
-        return this.roleService.findAll(headers, filterParam);
+        return this.roleService.findAll(filterParam, headers);
     }
 
     @Get(':id')

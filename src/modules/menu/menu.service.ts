@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNil } from 'lodash';
 import moment from 'moment';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 
 import { PaginateOptions, QueryHook } from '../database/types';
 import { HeaderParamDto } from '../restful/dto';
@@ -381,12 +381,12 @@ export class MenuService {
         // return [dashboardRoute, authRoute, levelRoute, sysRoute, linkRoute];
     }
 
-    async findAll(headers: HeaderParamDto, query: any): Promise<Menu[]> {
+    async findAll(query: any, headers: HeaderParamDto): Promise<Menu[]> {
         checkHeaders(headers);
 
         let output: any[] = await this.menuRepository.find({
             where: {
-                menu_name: query.menuName ? query.menuName : null,
+                menu_name: query.menuName ? Like(`%${query.menuName}%`) : null,
                 status: query.status ? query.status : null,
             },
             order: {

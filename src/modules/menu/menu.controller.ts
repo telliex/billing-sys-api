@@ -23,16 +23,16 @@ export class MenuController {
     async create(
         @Headers() headers: HeaderParamDto,
         @Body()
-        createMenuDto: MenuDto,
+        createDto: MenuDto,
     ): Promise<MenuDto> {
-        return this.menuService.create(createMenuDto, headers);
+        return this.menuService.create(createDto, headers);
     }
 
     // List the menu list
     @Get()
     async findAll(@Headers() headers: HeaderParamDto, @Query() filterParam: FilterParamDto) {
         // const { limit, offset } = paginationQuery;
-        return this.menuService.findAll(headers, filterParam);
+        return this.menuService.findAll(filterParam, headers);
     }
 
     @Get('nav')

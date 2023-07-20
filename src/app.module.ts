@@ -5,8 +5,10 @@ import { database } from './config';
 import { KeepaliveController } from './keepalive/keepalive.controller';
 import { InitMiddleware } from './middleware/init.middleware';
 import { DatabaseModule } from './modules/database/database.module';
+import { DepartmentModule } from './modules/department/department.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { RoleModule } from './modules/role/role.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
     imports: [
@@ -14,6 +16,8 @@ import { RoleModule } from './modules/role/role.module';
         DatabaseModule.forRoot(database),
         MenuModule,
         RoleModule,
+        UserModule,
+        DepartmentModule,
     ],
     controllers: [AppController, KeepaliveController],
     providers: [],

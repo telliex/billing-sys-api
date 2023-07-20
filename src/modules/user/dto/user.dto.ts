@@ -1,39 +1,50 @@
 import { Injectable } from '@nestjs/common';
 import { Transform, Expose } from 'class-transformer';
-import { IsNotEmpty, MaxLength, IsInt, IsString, IsOptional } from 'class-validator';
-
-// import { snakeCase } from 'lodash';
+import { IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 @Injectable()
-export class RoleDto {
+export class UserDto {
     @IsString()
-    @IsNotEmpty({ groups: ['update'], message: 'id required' })
+    @IsNotEmpty({ groups: ['update'], message: 'user id required' })
     id: string;
 
-    @IsNotEmpty({ message: 'role name required' })
-    @Expose({ name: 'role_name' })
+    @IsNotEmpty({ message: 'user name required' })
+    @Expose({ name: 'user_name' })
     @Transform(({ value }) => value, { toPlainOnly: true })
-    roleName: string;
+    userName: string;
 
-    @IsNotEmpty({ message: 'role value required' })
-    @Expose({ name: 'role_value' })
+    @IsNotEmpty({ message: 'real name required' })
+    @Expose({ name: 'real_name' })
     @Transform(({ value }) => value, { toPlainOnly: true })
-    roleValue: string;
+    realName: string;
 
     @IsString()
     @MaxLength(255, {
-        message: 'remark max length is 255',
+        message: 'avatar max length is 255',
     })
-    remark: string;
+    avatar: string;
 
     @IsString()
-    @MaxLength(100, {
-        message: 'Permission string max length is 100',
+    @MaxLength(255, {
+        message: 'desc max length is 255',
     })
-    menuPermission: string;
+    desc: string;
 
-    @IsInt()
-    status: number;
+    // set checkPassword(value: string)
+    @IsString()
+    @IsNotEmpty({ message: 'password  required' })
+    password: string;
+
+    @IsString()
+    token: string;
+
+    @IsString()
+    @Expose({ name: 'home_path' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
+    homePath: string;
+
+    @IsString()
+    roles: string;
 
     @IsInt()
     @IsNotEmpty({ groups: ['update'], message: 'user required' })
@@ -61,9 +72,9 @@ export class RoleDto {
 export class FilterParamDto {
     @IsString()
     @IsOptional()
-    roleName: string;
+    userName: string;
 
     @IsInt()
     @IsOptional()
-    status: number;
+    realName: string;
 }
