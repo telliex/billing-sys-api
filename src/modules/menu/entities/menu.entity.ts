@@ -41,7 +41,7 @@ export class Menu {
     component_name: string;
 
     @Column({ comment: 'path', type: 'varchar', width: 500, default: '', nullable: true })
-    rout_path: string;
+    route_path: string;
 
     @Column({ comment: 'order level', type: 'int', width: 11, default: 0, nullable: false })
     order_no: number;

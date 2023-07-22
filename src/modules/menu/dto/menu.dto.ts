@@ -71,9 +71,9 @@ export class MenuDto {
         message: 'Rout path max length is 500',
     })
     @IsNotEmpty({ message: 'rout path required' })
-    @Expose({ name: 'rout_path' })
+    @Expose({ name: 'route_path' })
     @Transform(({ value }) => value, { toPlainOnly: true })
-    routPath: string;
+    routePath: string;
 
     @IsInt()
     @IsNotEmpty({ message: 'order No required' })

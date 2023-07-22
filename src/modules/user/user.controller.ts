@@ -19,9 +19,16 @@ export class UserController {
         return this.userService.findAll(filterParam, headers);
     }
 
-    @Get('exist/:id')
-    findOneIfExist(@Headers() headers: HeaderParamDto, @Param('userName') userName: string) {
-        return this.userService.findOneIfExist(userName, headers);
+    @Get('exist')
+    findOneIfExist(
+        @Headers() headers: HeaderParamDto,
+        @Query()
+        param: {
+            userName: string;
+            id: string;
+        },
+    ) {
+        return this.userService.findOneIfExist(param, headers);
     }
 
     @Get(':id')

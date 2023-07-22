@@ -75,10 +75,26 @@ export class UserService {
         return output;
     }
 
-    async findOneIfExist(userName: string, headers: HeaderParamDto) {
+    async findOneIfExist(
+        param: {
+            userName: string;
+            id: string;
+        },
+        headers: HeaderParamDto,
+    ) {
         checkHeaders(headers);
-        const target = await this.userRepository.findOneBy({ user_name: userName });
-        return !!target;
+        console.log('param:', param);
+        const targetId = await this.userRepository.findOneBy({ id: param.id });
+        const targetUserName = await this.userRepository.findOneBy({ user_name: param.userName });
+        console.log('targetId:', targetId);
+        console.log('targetUserName:', targetUserName);
+        if (targetId.user_name === param.userName && targetUserName) {
+            return false;
+        }
+        if (!targetUserName) {
+            return false;
+        }
+        return true;
     }
 
     findOne(id: string, headers: HeaderParamDto) {

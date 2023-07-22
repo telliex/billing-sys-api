@@ -6,7 +6,7 @@ export interface SnakeTypeMenuItem {
     permission: string;
     component: string;
     component_name: string;
-    rout_path: string;
+    route_path: string;
     order_no: number;
     icon: string;
     parent_menu: string;
@@ -29,7 +29,7 @@ export interface CamelTypeMenuItem {
     permission: string;
     component: string;
     componentName: string;
-    routPath: string;
+    routePath: string;
     orderNo: number;
     icon: string;
     parentMenu: string;
@@ -43,7 +43,7 @@ export interface CamelTypeMenuItem {
     changeTime: string;
 }
 
-export interface Menu {
+export interface MenuItem {
     readonly id: string;
     readonly type: string;
     readonly menuName: string;
@@ -52,7 +52,7 @@ export interface Menu {
     readonly permission: string;
     readonly component: string;
     readonly componentName: string;
-    readonly routPath: string;
+    readonly routePath: string;
     readonly orderNo: number;
     readonly icon: string;
     readonly parentMenu: string;

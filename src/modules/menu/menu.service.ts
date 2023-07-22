@@ -45,25 +45,27 @@ export class MenuService {
             },
         });
 
-        const result = temp.map((item) => {
-            return {
-                id: item.id,
-                type: item.type,
-                path: item.rout_path,
-                name: item.alias,
-                component: item.component,
-                redirect: item.parent_menu === '' ? item.rout_path : null,
-                parentMenu: item.parent_menu,
-                caseSensitive: true,
-                meta: {
-                    hideMenu: item.status === 0,
-                    title: item.alias,
-                    hideChildrenInMenu: false,
-                    icon: item.icon,
-                },
-                children: [],
-            };
-        });
+        const result = temp
+            .filter((item) => item.type !== 'button')
+            .map((item) => {
+                return {
+                    id: item.id,
+                    type: item.type,
+                    path: item.route_path,
+                    name: item.alias,
+                    component: item.component,
+                    redirect: item.parent_menu === '' ? item.route_path : null,
+                    parentMenu: item.parent_menu,
+                    caseSensitive: true,
+                    meta: {
+                        hideMenu: item.status === 0,
+                        title: item.alias,
+                        hideChildrenInMenu: false,
+                        icon: item.icon,
+                    },
+                    children: [],
+                };
+            });
         console.log('result1:', result);
 
         result.forEach((item) => {
