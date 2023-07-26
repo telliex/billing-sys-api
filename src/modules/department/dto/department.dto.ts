@@ -49,6 +49,11 @@ export class DepartmentDto {
     addMaster: number;
 
     @IsString()
+    @Expose({ name: 'add_master_name' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
+    addMasterName: string;
+
+    @IsString()
     @IsNotEmpty({ groups: ['update'], message: 'add time required' })
     @Expose({ name: 'add_time' })
     @Transform(({ value }) => value, { toPlainOnly: true })
@@ -58,6 +63,11 @@ export class DepartmentDto {
     @Expose({ name: 'change_master' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     changeMaster: number;
+
+    @IsString()
+    @Expose({ name: 'change_master_name' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
+    changeMasterName: string;
 
     @IsString()
     @Expose({ name: 'change_time' })

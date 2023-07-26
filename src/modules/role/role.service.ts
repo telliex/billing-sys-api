@@ -12,6 +12,7 @@ import {
     snakeCaseToCamelCase,
     camelCaseToSnakeCase,
 } from '../restful/helpers';
+import { User } from '../user/entities/user.entity';
 
 import { RoleDto } from './dto/role.dto';
 import { Role } from './entities/role.entity';
@@ -21,7 +22,9 @@ import { CamelTypeRoleItem } from './interfaces/role.interface';
 export class RoleService {
     constructor(
         @InjectRepository(Role)
-        private readonly roleRepository: Repository<Role>,
+        private roleRepository: Repository<Role>,
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
     ) {}
 
     async create(createDto: RoleDto, headers: HeaderParamDto) {
@@ -31,13 +34,14 @@ export class RoleService {
             camelCaseToSnakeCase(createDto),
         );
         const user = Number(headers['user-id']);
-
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
         newItem.id = undefined;
         newItem.add_master = user;
+        newItem.add_master_name = target.user_name;
         newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         newItem.change_master = user;
+        newItem.change_master_name = target.user_name;
         newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        console.log('newItem:', newItem);
         const output: CamelTypeRoleItem = snakeCaseToCamelCase(
             await this.roleRepository.save(newItem),
         ) as unknown as CamelTypeRoleItem;
@@ -80,21 +84,21 @@ export class RoleService {
 
     async update(id: string, updateDto: RoleDto, headers: HeaderParamDto) {
         checkHeaders(headers);
-        const target = await this.roleRepository.findOneBy({ id });
+        const targetItem = await this.roleRepository.findOneBy({ id });
 
         const user = Number(headers['user-id']);
-
-        if (isNil(target)) {
+        if (isNil(targetItem)) {
             throw new NotFoundException(`The role #${id} is not found.`);
         }
 
-        const updateRoleTemp = Object.assign(target, camelCaseToSnakeCase(updateDto));
+        const updateItem = Object.assign(targetItem, camelCaseToSnakeCase(updateDto));
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
 
-        updateRoleTemp.change_master = user;
-        updateRoleTemp.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-
+        updateItem.change_master = user;
+        updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        updateItem.change_master_name = target.user_name;
         const output = snakeCaseToCamelCase(
-            await this.roleRepository.save(updateRoleTemp),
+            await this.roleRepository.save(updateItem),
         ) as CamelTypeRoleItem;
         output.changeTime = output.changeTime
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
@@ -129,14 +133,13 @@ export class RoleService {
 
     async remove(id: string, headers: HeaderParamDto) {
         checkHeaders(headers);
-
-        const target = await this.roleRepository.findOneBy({ id });
-        if (!target) {
+        const targetItem = await this.roleRepository.findOneBy({ id });
+        if (!targetItem) {
             throw new NotFoundException(`The menu #${id} is not found.`);
         }
         // transform to camelCase
         const output: CamelTypeRoleItem = snakeCaseToCamelCase(
-            await this.roleRepository.remove(target),
+            await this.roleRepository.remove(targetItem),
         ) as CamelTypeRoleItem;
 
         output.changeTime = output.changeTime

@@ -14,6 +14,7 @@ import {
     offsetUtCTime,
     snakeCaseToCamelCase,
 } from '../restful/helpers';
+import { User } from '../user/entities/user.entity';
 
 import { DepartmentDto } from './dto';
 import { Department } from './entities/department.entity';
@@ -23,28 +24,28 @@ export class DepartmentService {
     constructor(
         @InjectRepository(Department)
         private readonly departmentRepository: Repository<Department>,
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
     ) {}
 
     async create(createDto: DepartmentDto, headers: HeaderParamDto) {
         checkHeaders(headers);
-
-        const complexItem = Object.assign(
+        const newItem = Object.assign(
             this.departmentRepository.create(),
             camelCaseToSnakeCase(createDto),
         );
-
         const user = Number(headers['user-id']);
-        // const number = Number(headers['time-zone'].split('UTC+')[1]);
-        // const utcOffset =
-        //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
-        complexItem.id = undefined;
-        complexItem.add_master = user;
-        complexItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        complexItem.change_master = user;
-        complexItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        console.log('complexItem:', complexItem);
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
+        newItem.id = undefined;
+        newItem.add_master = user;
+        newItem.add_master_name = target.user_name;
+        newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        newItem.change_master = user;
+        newItem.change_master_name = target.user_name;
+        newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+
         const output: CamelTypeMenuItem = snakeCaseToCamelCase(
-            await this.departmentRepository.save(complexItem),
+            await this.departmentRepository.save(newItem),
         ) as unknown as CamelTypeMenuItem;
 
         output.changeTime = output.changeTime
@@ -123,12 +124,14 @@ export class DepartmentService {
             throw new NotFoundException(`The dept #${id} is not found.`);
         }
 
-        const updatedTargetTemp = Object.assign(targetItem, camelCaseToSnakeCase(updateDto));
-        updatedTargetTemp.change_master = user;
-        updatedTargetTemp.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        const updateItem = Object.assign(targetItem, camelCaseToSnakeCase(updateDto));
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
 
+        updateItem.change_master = user;
+        updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        updateItem.change_master_name = target.user_name;
         const output = snakeCaseToCamelCase(
-            await this.departmentRepository.save(updatedTargetTemp),
+            await this.departmentRepository.save(updateItem),
         ) as CamelTypeMenuItem;
         output.changeTime = output.changeTime
             ? offsetUtCTime(output.changeTime, headers['time-zone'])

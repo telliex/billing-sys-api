@@ -4,6 +4,7 @@ import { isNil } from 'lodash';
 import moment from 'moment';
 import { Repository } from 'typeorm';
 
+import { Menu } from '../menu/entities/menu.entity';
 import { HeaderParamDto } from '../restful/dto';
 
 import {
@@ -26,6 +27,8 @@ export class MenuButtonsService {
         private menuButtonsRepository: Repository<MenuButtons>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        @InjectRepository(Menu)
+        private menuRepository: Repository<Menu>,
     ) {}
 
     async create(createDto: MenuButtonDto, headers: HeaderParamDto) {
@@ -35,16 +38,14 @@ export class MenuButtonsService {
             camelCaseToSnakeCase(createDto),
         );
         const user = Number(headers['user-id']);
-
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
         newItem.id = undefined;
         newItem.add_master = user;
-        const targetItem = await this.userRepository.findOneBy({ mgt_number: user });
-        newItem.add_master_name = targetItem.user_name;
+        newItem.add_master_name = target.user_name;
         newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         newItem.change_master = user;
-        newItem.change_master_name = targetItem.user_name;
+        newItem.change_master_name = target.user_name;
         newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        console.log('newItem:', newItem);
         const output: CamelTypeMenuButtonItem = snakeCaseToCamelCase(
             await this.menuButtonsRepository.save(newItem),
         ) as unknown as CamelTypeMenuButtonItem;
@@ -53,7 +54,25 @@ export class MenuButtonsService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        console.log('output:', output);
+
+        // write bill_system_menu [menu_buttons]
+        const menu = await this.menuRepository.findOneBy({ id: createDto.belongMenu });
+        const buttonList: any[] = await this.menuButtonsRepository.find({
+            select: {
+                button_name: true,
+            },
+            where: {
+                belong_menu: createDto.belongMenu,
+                status: 1,
+            },
+            order: {
+                button_name: 'ASC',
+            },
+        });
+        console.log('66666666 button list', buttonList);
+        menu.menu_buttons = buttonList.join(',');
+        this.menuRepository.save(menu);
+
         return output;
     }
 
@@ -94,45 +113,85 @@ export class MenuButtonsService {
 
     async update(id: string, updateDto: MenuButtonDto, headers: HeaderParamDto) {
         checkHeaders(headers);
-        const target = await this.menuButtonsRepository.findOneBy({ id });
+        const targetItem = await this.menuButtonsRepository.findOneBy({ id });
 
         const user = Number(headers['user-id']);
 
-        if (isNil(target)) {
+        if (isNil(targetItem)) {
             throw new NotFoundException(`The role #${id} is not found.`);
         }
 
-        const updateRoleTemp = Object.assign(target, camelCaseToSnakeCase(updateDto));
+        const updateItem = Object.assign(targetItem, camelCaseToSnakeCase(updateDto));
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
 
-        updateRoleTemp.change_master = user;
-        updateRoleTemp.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        updateItem.change_master = user;
+        updateItem.change_master_name = target.user_name;
+        updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
 
         const output = snakeCaseToCamelCase(
-            await this.menuButtonsRepository.save(updateRoleTemp),
+            await this.menuButtonsRepository.save(updateItem),
         ) as CamelTypeMenuButtonItem;
         output.changeTime = output.changeTime
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
+
+        // write bill_system_menu [menu_buttons]
+        const menu = await this.menuRepository.findOneBy({ id: updateDto.belongMenu });
+        const buttonList: any[] = await this.menuButtonsRepository.find({
+            select: {
+                button_name: true,
+            },
+            where: {
+                belong_menu: updateDto.belongMenu,
+                status: 1,
+            },
+            order: {
+                button_name: 'ASC',
+            },
+        });
+        console.log('7777777 button list', buttonList);
+        menu.menu_buttons = buttonList.join(',');
+        this.menuRepository.save(menu);
+
         return output;
     }
 
     async remove(id: string, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const target = await this.menuButtonsRepository.findOneBy({ id });
-        if (!target) {
+        const targetItem = await this.menuButtonsRepository.findOneBy({ id });
+        if (!targetItem) {
             throw new NotFoundException(`The menu #${id} is not found.`);
         }
         // transform to camelCase
         const output: CamelTypeMenuButtonItem = snakeCaseToCamelCase(
-            await this.menuButtonsRepository.remove(target),
+            await this.menuButtonsRepository.remove(targetItem),
         ) as CamelTypeMenuButtonItem;
 
         output.changeTime = output.changeTime
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
+
+        // write bill_system_menu [menu_buttons]
+        const menu = await this.menuRepository.findOneBy({ id: targetItem.belong_menu });
+        const buttonList: any[] = await this.menuButtonsRepository.find({
+            select: {
+                button_name: true,
+            },
+            where: {
+                belong_menu: targetItem.belong_menu,
+                status: 1,
+            },
+            order: {
+                button_name: 'ASC',
+            },
+        });
+        console.log('888888 button list', buttonList);
+        menu.menu_buttons = buttonList.join(',');
+        this.menuRepository.save(menu);
+
         return output;
     }
 }

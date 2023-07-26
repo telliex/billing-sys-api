@@ -2,8 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 // import { NestExpressApplication } from '@nestjs/platform-express';
 
-// 为了在使用class-validator的DTO类中也可以注入nestjs容器的依赖，需要在main.ts中添加如下代码：
-
 import { AppModule } from './app.module';
 
 function MiddleWareToAll(res: any, req: any, next: any) {

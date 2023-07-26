@@ -428,50 +428,33 @@ export class MenuService {
     }
 
     // remove menu item
-    async remove(id: string, headers: HeaderParamDto): Promise<CamelTypeMenuItem | null> {
-        checkHeaders(headers);
-        const targetMenu = await this.menuRepository.findOneBy({ id });
 
-        if (!targetMenu) {
-            throw new NotFoundException(`The menu #${id} is not found.`);
-        }
-        // transform to camelCase
-        const output: CamelTypeMenuItem = snakeCaseToCamelCase(
-            await this.menuRepository.remove(targetMenu),
-        ) as CamelTypeMenuItem;
-
-        output.changeTime = output.changeTime
-            ? offsetUtCTime(output.changeTime, headers['time-zone'])
-            : '';
-        output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        return output;
-    }
-
-    async create(menuItem: CamelTypeMenuItem, headers: HeaderParamDto): Promise<CamelTypeMenuItem> {
+    async create(
+        createDto: CamelTypeMenuItem,
+        headers: HeaderParamDto,
+    ): Promise<CamelTypeMenuItem> {
         checkHeaders(headers);
 
-        const newMenuItem = Object.assign(
+        const newItem = Object.assign(
             this.menuRepository.create(),
-            camelCaseToSnakeCase(menuItem),
+            camelCaseToSnakeCase(createDto),
         );
 
         const user = Number(headers['user-id']);
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
         // const number = Number(headers['time-zone'].split('UTC+')[1]);
         // const utcOffset =
         //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
-        newMenuItem.id = undefined;
-        newMenuItem.add_master = user;
-        console.log('6666666666:', user);
-        const targetItem = await this.userRepository.findOneBy({ mgt_number: user });
-        console.log('7777777777:', targetItem);
-        newMenuItem.add_master_name = targetItem.user_name;
-        newMenuItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        newMenuItem.change_master = user;
-        newMenuItem.change_master_name = targetItem.user_name;
-        newMenuItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        console.log('newMenuItem:', newMenuItem);
+        newItem.id = undefined;
+        newItem.add_master = user;
+        newItem.add_master_name = target.user_name;
+        newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        newItem.change_master = user;
+        newItem.change_master_name = target.user_name;
+        newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        console.log('newItem:', newItem);
         const output: CamelTypeMenuItem = snakeCaseToCamelCase(
-            await this.menuRepository.save(newMenuItem),
+            await this.menuRepository.save(newItem),
         ) as unknown as CamelTypeMenuItem;
 
         output.changeTime = output.changeTime
@@ -484,41 +467,51 @@ export class MenuService {
 
     async update(
         id: string,
-        updateMenu: CamelTypeMenuItem,
+        updateDto: CamelTypeMenuItem,
         headers: HeaderParamDto,
     ): Promise<CamelTypeMenuItem> {
         checkHeaders(headers);
-        const targetMenu = await this.menuRepository.findOneBy({ id });
+        const targetItem = await this.menuRepository.findOneBy({ id });
 
         const user = Number(headers['user-id']);
         // const number = Number(headers['time-zone'].split('UTC+')[1]);
         // const utcOffset =
         //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
-        if (isNil(targetMenu)) {
+        if (isNil(targetItem)) {
             throw new NotFoundException(`The menu #${id} is not found.`);
         }
 
-        const updateMenuTemp = Object.assign(targetMenu, camelCaseToSnakeCase(updateMenu));
+        const updateItem = Object.assign(targetItem, camelCaseToSnakeCase(updateDto));
 
-        // for (const key in updateMenuTemp) {
-        //     if (key !== 'id') {
-        //         // @ts-ignore
-        //         targetMenu[key as keyof SnakeTypeMenuItem] =
-        //             updateMenuTemp[key as keyof SnakeTypeMenuItem];
-        //     }
-        // }
-        console.log('6666666666:', user);
-        const targetItem = await this.userRepository.findOneBy({ mgt_number: user });
-        console.log('7777777777:', targetItem);
-        updateMenuTemp.change_master = user;
-        updateMenuTemp.add_master_name = targetItem.user_name;
-        updateMenuTemp.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
+        updateItem.change_master = user;
+        updateItem.change_master_name = target.user_name;
+        updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
 
-        console.log('updateMenuTemp:', updateMenuTemp);
+        console.log('updateItem:', updateItem);
 
         const output = snakeCaseToCamelCase(
-            await this.menuRepository.save(updateMenuTemp),
+            await this.menuRepository.save(updateItem),
         ) as CamelTypeMenuItem;
+        output.changeTime = output.changeTime
+            ? offsetUtCTime(output.changeTime, headers['time-zone'])
+            : '';
+        output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
+        return output;
+    }
+
+    async remove(id: string, headers: HeaderParamDto): Promise<CamelTypeMenuItem | null> {
+        checkHeaders(headers);
+        const targetItem = await this.menuRepository.findOneBy({ id });
+
+        if (!targetItem) {
+            throw new NotFoundException(`The menu #${id} is not found.`);
+        }
+        // transform to camelCase
+        const output: CamelTypeMenuItem = snakeCaseToCamelCase(
+            await this.menuRepository.remove(targetItem),
+        ) as CamelTypeMenuItem;
+
         output.changeTime = output.changeTime
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';

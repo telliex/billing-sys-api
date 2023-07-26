@@ -23,11 +23,17 @@ export class Department {
     @Column({ comment: 'who added', type: 'int', width: 11 })
     add_master: number;
 
+    @Column({ comment: 'who added by name', type: 'varchar', width: 255, nullable: false })
+    add_master_name: string;
+
     @Column('datetime')
     add_time: string;
 
     @Column({ comment: 'who changed', type: 'int', width: 11 })
     change_master: number;
+
+    @Column({ comment: 'who changed by name', type: 'varchar', width: 255, nullable: false })
+    change_master_name: string;
 
     @Column('datetime')
     change_time: string;

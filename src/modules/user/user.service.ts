@@ -32,13 +32,14 @@ export class UserService {
             camelCaseToSnakeCase(createDto),
         );
         const user = Number(headers['user-id']);
-
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
         newItem.id = undefined;
         newItem.add_master = user;
+        newItem.add_master_name = target.user_name;
         newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         newItem.change_master = user;
+        newItem.change_master_name = target.user_name;
         newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        console.log('newItem:', newItem);
         const output: CamelTypeUserItem = snakeCaseToCamelCase(
             await this.userRepository.save(newItem),
         ) as unknown as CamelTypeUserItem;
@@ -104,21 +105,23 @@ export class UserService {
 
     async update(id: string, updateDto: UserDto, headers: HeaderParamDto) {
         checkHeaders(headers);
-        const target = await this.userRepository.findOneBy({ id });
+        const targetItem = await this.userRepository.findOneBy({ id });
 
         const user = Number(headers['user-id']);
 
-        if (isNil(target)) {
+        if (isNil(targetItem)) {
             throw new NotFoundException(`The user #${id} is not found.`);
         }
 
-        const updateItemTemp = Object.assign(target, camelCaseToSnakeCase(updateDto));
+        const updateItem = Object.assign(targetItem, camelCaseToSnakeCase(updateDto));
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
 
-        updateItemTemp.change_master = user;
-        updateItemTemp.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        updateItem.change_master = user;
+        updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        updateItem.change_master_name = target.user_name;
 
         const output = snakeCaseToCamelCase(
-            await this.userRepository.save(updateItemTemp),
+            await this.userRepository.save(updateItem),
         ) as CamelTypeUserItem;
         output.changeTime = output.changeTime
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
@@ -130,15 +133,15 @@ export class UserService {
     async remove(id: string, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const target = await this.userRepository.findOneBy({ id });
-        if (!target) {
+        const targetItem = await this.userRepository.findOneBy({ id });
+        if (!targetItem) {
             throw new NotFoundException(`The user #${id} is not found.`);
         }
-        target.isRemoved = 1;
-        target.status = 0;
+        targetItem.isRemoved = 1;
+        targetItem.status = 0;
         // transform to camelCase
         const output: CamelTypeUserItem = snakeCaseToCamelCase(
-            await this.userRepository.save(target),
+            await this.userRepository.save(targetItem),
         ) as CamelTypeUserItem;
 
         output.changeTime = output.changeTime
