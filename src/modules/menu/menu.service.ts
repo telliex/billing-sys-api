@@ -71,7 +71,6 @@ export class MenuService {
                     children: [],
                 };
             });
-        console.log('result1:', result);
 
         result.forEach((item) => {
             if (item.parentMenu === '' && item.type === 'catalog') {
@@ -88,8 +87,6 @@ export class MenuService {
                 });
             }
         });
-        console.log('result2:', result);
-
         const home = {
             id: '323ef5b1-e92e-467d-bef2-fc8e86eb3a04',
             type: 'catalog',
@@ -130,7 +127,6 @@ export class MenuService {
             item.meta.hideChildrenInMenu = item.children && item.children.length <= 1;
         });
         menuTree.unshift(home);
-        console.log('menuTree:', menuTree);
 
         // single
         const dashboardRoute = {
@@ -407,8 +403,6 @@ export class MenuService {
             temp.addTime ? offsetUtCTime(temp.addTime, headers['time-zone']) : '';
             return temp;
         });
-        console.log('output=======');
-        console.log(output);
         return output;
     }
 
@@ -452,7 +446,6 @@ export class MenuService {
         newItem.change_master = user;
         newItem.change_master_name = target.user_name;
         newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        console.log('newItem:', newItem);
         const output: CamelTypeMenuItem = snakeCaseToCamelCase(
             await this.menuRepository.save(newItem),
         ) as unknown as CamelTypeMenuItem;
@@ -461,7 +454,6 @@ export class MenuService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        console.log('output:', output);
         return output;
     }
 
@@ -487,9 +479,6 @@ export class MenuService {
         updateItem.change_master = user;
         updateItem.change_master_name = target.user_name;
         updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-
-        console.log('updateItem:', updateItem);
-
         const output = snakeCaseToCamelCase(
             await this.menuRepository.save(updateItem),
         ) as CamelTypeMenuItem;

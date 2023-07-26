@@ -54,9 +54,10 @@ export class MenuButtonsService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-
+        console.log('=====createDto.belongMenu======', createDto.belongMenu);
         // write bill_system_menu [menu_buttons]
         const menu = await this.menuRepository.findOneBy({ id: createDto.belongMenu });
+        console.log('=====target menu======', menu);
         const buttonList: any[] = await this.menuButtonsRepository.find({
             select: {
                 button_name: true,
@@ -69,8 +70,11 @@ export class MenuButtonsService {
                 button_name: 'ASC',
             },
         });
-        console.log('66666666 button list', buttonList);
-        menu.menu_buttons = buttonList.join(',');
+        console.log(
+            '========find button list=========',
+            buttonList.map((item) => item.button_name),
+        );
+        menu.menu_buttons = buttonList.map((item) => item.button_name).join(',');
         this.menuRepository.save(menu);
 
         return output;
@@ -150,8 +154,7 @@ export class MenuButtonsService {
                 button_name: 'ASC',
             },
         });
-        console.log('7777777 button list', buttonList);
-        menu.menu_buttons = buttonList.join(',');
+        menu.menu_buttons = buttonList.map((item) => item.button_name).join(',');
         this.menuRepository.save(menu);
 
         return output;
@@ -188,8 +191,7 @@ export class MenuButtonsService {
                 button_name: 'ASC',
             },
         });
-        console.log('888888 button list', buttonList);
-        menu.menu_buttons = buttonList.join(',');
+        menu.menu_buttons = buttonList.map((item) => item.button_name).join(',');
         this.menuRepository.save(menu);
 
         return output;
