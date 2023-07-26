@@ -113,11 +113,20 @@ export class MenuDto {
     @IsNotEmpty({ message: 'user required' })
     status: number;
 
+    @IsString()
+    @Expose({ name: 'menu_buttons' })
+    menuButtons: string;
+
     @IsInt()
     @IsNotEmpty({ groups: ['update'], message: 'user required' })
     @Expose({ name: 'add_master' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     addMaster: number;
+
+    @IsString()
+    @Expose({ name: 'add_master_name' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
+    addMasterName: string;
 
     @IsString()
     @IsNotEmpty({ groups: ['update'], message: 'add time required' })
@@ -129,6 +138,11 @@ export class MenuDto {
     @Expose({ name: 'change_master' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     changeMaster: number;
+
+    @IsString()
+    @Expose({ name: 'change_master_name' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
+    changeMasterName: string;
 
     @IsString()
     @Expose({ name: 'change_time' })

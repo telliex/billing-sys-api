@@ -29,9 +29,9 @@ export class RoleController {
     async update(
         @Headers() headers: HeaderParamDto,
         @Param('id') id: string,
-        @Body() updateRoleDto: RoleDto,
+        @Body() updateDto: RoleDto,
     ) {
-        return this.roleService.update(id, updateRoleDto, headers);
+        return this.roleService.update(id, updateDto, headers);
     }
 
     @Patch('status/:id')

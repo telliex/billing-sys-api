@@ -14,6 +14,9 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
+    @Column({ comment: 'MGT number', type: 'int', width: 10, nullable: false })
+    mgt_number: number;
+
     @Column({ comment: 'user name', type: 'varchar', width: 255, nullable: false })
     user_name: string;
 

@@ -14,6 +14,8 @@ import {
     checkHeaders,
 } from '../restful/helpers';
 
+import { User } from '../user/entities/user.entity';
+
 import { Menu } from './entities/menu.entity';
 import { NavItem, CamelTypeMenuItem } from './interfaces/menu.interface';
 
@@ -22,6 +24,8 @@ export class MenuService {
     constructor(
         @InjectRepository(Menu)
         private menuRepository: Repository<Menu>,
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
     ) {}
 
     async paginate(options: PaginateOptions, callback?: QueryHook<Menu>) {
@@ -38,6 +42,7 @@ export class MenuService {
         const temp: any[] = await this.menuRepository.find({
             where: {
                 menu_name: query.menuName ? query.menuName : null,
+                alias: query.alias ? query.alias : null,
                 status: query.status ? query.status : null,
             },
             order: {
@@ -389,6 +394,7 @@ export class MenuService {
         let output: any[] = await this.menuRepository.find({
             where: {
                 menu_name: query.menuName ? Like(`%${query.menuName}%`) : null,
+                alias: query.alias ? query.alias : null,
                 status: query.status ? query.status : null,
             },
             order: {
@@ -455,8 +461,13 @@ export class MenuService {
         //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
         newMenuItem.id = undefined;
         newMenuItem.add_master = user;
+        console.log('6666666666:', user);
+        const targetItem = await this.userRepository.findOneBy({ mgt_number: user });
+        console.log('7777777777:', targetItem);
+        newMenuItem.add_master_name = targetItem.user_name;
         newMenuItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         newMenuItem.change_master = user;
+        newMenuItem.change_master_name = targetItem.user_name;
         newMenuItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         console.log('newMenuItem:', newMenuItem);
         const output: CamelTypeMenuItem = snakeCaseToCamelCase(
@@ -496,7 +507,11 @@ export class MenuService {
         //             updateMenuTemp[key as keyof SnakeTypeMenuItem];
         //     }
         // }
+        console.log('6666666666:', user);
+        const targetItem = await this.userRepository.findOneBy({ mgt_number: user });
+        console.log('7777777777:', targetItem);
         updateMenuTemp.change_master = user;
+        updateMenuTemp.add_master_name = targetItem.user_name;
         updateMenuTemp.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
 
         console.log('updateMenuTemp:', updateMenuTemp);

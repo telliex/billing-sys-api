@@ -64,16 +64,25 @@ export class Menu {
     @Column({ comment: 'status', type: 'tinyint', width: 1, default: 0, nullable: false })
     status: number;
 
+    @Column({ comment: 'menu button groups', type: 'varchar', nullable: true })
+    menu_buttons: string;
+
     @Column({ comment: 'who added', type: 'int', width: 11 })
     add_master: number;
+
+    @Column({ comment: 'who added by name', type: 'varchar', width: 255, nullable: false })
+    add_master_name: string;
 
     @Column('datetime')
     add_time: string;
     // @CreateDateColumn({ comment: 'created date' })
     // add_time: Date;
 
-    @Column({ comment: 'who changed', type: 'int', width: 11 })
+    @Column({ comment: 'who changed by number', type: 'int', width: 11 })
     change_master: number;
+
+    @Column({ comment: 'who changed by name', type: 'varchar', width: 255, nullable: false })
+    change_master_name: string;
 
     @Column('datetime')
     change_time: string;
