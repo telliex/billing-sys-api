@@ -47,8 +47,20 @@ export class User {
     @Column({ comment: 'token', type: 'varchar', width: 255, nullable: false })
     token: string;
 
-    @Column({ comment: 'dept', type: 'varchar', width: 255, default: '', nullable: true })
+    @Column({ comment: 'dept', type: 'varchar', width: 255, default: '', nullable: false })
     dept: string;
+
+    @Column({
+        comment: 'dept',
+        type: 'varchar',
+        width: 255,
+        default: 'ECloudvalley',
+        nullable: false,
+    })
+    compnay: string;
+
+    @Column({ comment: 'dept', type: 'varchar', width: 255, default: 'CRS', nullable: false })
+    system: string;
 
     @Column({
         comment: 'homePath',

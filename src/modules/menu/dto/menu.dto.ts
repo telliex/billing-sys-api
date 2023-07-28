@@ -115,6 +115,7 @@ export class MenuDto {
 
     @IsString()
     @Expose({ name: 'menu_buttons' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
     menuButtons: string;
 
     @IsInt()

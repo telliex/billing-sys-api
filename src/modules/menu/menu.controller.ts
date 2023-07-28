@@ -45,12 +45,12 @@ export class MenuController {
     }
 
     @Get('nav')
-    async findList(
+    async findDynimicMenuList(
         @Headers() headers: HeaderParamDto,
         @Query() filterParam: FilterParamDto,
     ): Promise<NavItem[]> {
         // const { limit, offset } = paginationQuery;
-        return this.menuService.findNavList(headers, filterParam);
+        return this.menuService.findDynimicMenuList(headers, filterParam);
     }
 
     // Get the menu item

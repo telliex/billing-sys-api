@@ -44,9 +44,7 @@ export class MenuService {
 
         const tempMenu: any[] = await this.menuRepository.find({
             where: {
-                menu_name: query.menuName ? query.menuName : null,
-                alias: query.alias ? query.alias : null,
-                status: query.status ? query.status : null,
+                status: query.status ? query.status : 1,
             },
             order: {
                 order_no: 'ASC',
@@ -64,8 +62,6 @@ export class MenuService {
                     children: [],
                 };
             });
-
-        console.log('resultMenu========', resultMenu);
 
         // const catalogs = resultMenu.filter(
         //     (item) => item.parentMenu === '' && item.type === 'catalog',
@@ -90,38 +86,38 @@ export class MenuService {
                 permission: item.button_permission,
             };
         });
-
-        console.log('resultButton=======', resultButton);
-
         return [...resultMenu, ...resultButton];
 
         // return [dashboardRoute, authRoute, levelRoute, sysRoute, linkRoute];
     }
 
-    async findNavList(headers: HeaderParamDto, query: any): Promise<NavItem[]> {
+    // show the dynimic menu list
+    async findDynimicMenuList(headers: HeaderParamDto, query: any): Promise<NavItem[]> {
         checkHeaders(headers);
 
         const temp: any[] = await this.menuRepository.find({
             where: {
                 menu_name: query.menuName ? query.menuName : null,
                 alias: query.alias ? query.alias : null,
-                status: query.status ? query.status : null,
+                status: 1,
             },
             order: {
                 order_no: 'ASC',
             },
         });
 
-        const result = temp
-            .filter((item) => item.type !== 'button')
+        const newTemp = temp
+            // .filter((item) => item.type !== 'button')
             .map((item) => {
                 return {
                     id: item.id,
                     type: item.type,
                     path: item.route_path,
                     name: item.alias,
+                    status: item.status,
                     component: item.component,
-                    redirect: item.parent_menu === '' ? item.route_path : null,
+                    isExt: item.is_ext,
+                    redirect: null,
                     parentMenu: item.parent_menu,
                     caseSensitive: true,
                     meta: {
@@ -134,21 +130,26 @@ export class MenuService {
                 };
             });
 
-        result.forEach((item) => {
-            if (item.parentMenu === '' && item.type === 'catalog') {
-                // menuTree.push(item);
-            } else {
-                result.forEach((subItem) => {
-                    if (item.parentMenu === subItem.id) {
-                        if (subItem.children) {
-                            subItem.children.push(item);
-                        } else {
-                            subItem.children = [item];
-                        }
-                    }
-                });
-            }
-        });
+        const result = this.buildMenuNestedStructure(newTemp);
+        // this.processItems(result);
+
+        // result.forEach((item) => {
+        //     if (item.parentMenu === '' && item.type === 'catalog') {
+        //         // menuTree.push(item);
+        //     } else {
+        //         result.forEach((subItem) => {
+        //             if (item.parentMenu === subItem.id) {
+        //                 if (subItem.children) {
+        //                     subItem.children.push(item);
+        //                 } else {
+        //                     subItem.children = [item];
+        //                 }
+        //             }
+        //         });
+        //     }
+        // });
+
+        // staic pages
         const home = {
             id: '323ef5b1-e92e-467d-bef2-fc8e86eb3a04',
             type: 'catalog',
@@ -156,6 +157,7 @@ export class MenuService {
             name: 'Home',
             component: 'LAYOUT',
             redirect: '/home/index',
+            isExt: 1,
             parentMenu: '',
             caseSensitive: true,
             meta: {
@@ -181,16 +183,7 @@ export class MenuService {
                 },
             ],
         };
-        const menuTree = result.filter((item) => item.parentMenu === '' && item.type === 'catalog');
-        menuTree.forEach((item) => {
-            item.redirect = `${item.path}${
-                item.children && item.children.length >= 1 ? `/${item.children[0].path}` : ''
-            }`;
-            item.meta.hideChildrenInMenu = item.children && item.children.length <= 1;
-        });
-        menuTree.unshift(home);
-
-        return menuTree;
+        return [home, ...result];
 
         // return [dashboardRoute, authRoute, levelRoute, sysRoute, linkRoute];
     }
@@ -317,5 +310,56 @@ export class MenuService {
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
         return output;
+    }
+
+    buildMenuNestedStructure(data: any[]) {
+        const map: any = {}; // 用來快速查找 id 對應的物件
+        const result: any[] = []; // 最終的結果
+
+        // 將原始資料放入 map 中
+        data.forEach((item) => {
+            map[item.id] = item;
+            item.children = undefined; // 初始化 children 屬性
+        });
+
+        // 將每個 item 放到對應的 parent 的 children 中
+        data.forEach((item) => {
+            if (item.parentMenu !== '') {
+                const parent = map[item.parentMenu];
+                if (parent) {
+                    if (parent.children) {
+                        parent.children.push(item);
+                    } else {
+                        parent.children = [item];
+                    }
+                }
+            } else {
+                result.push(item); // 沒有 parentMenu 的 item 是根節點，放到最終結果中
+            }
+        });
+
+        // deal with inner link default index
+        // data.forEach((item) => {
+        //     if (item.children.length === 1 && item.children[0].path === 'index') {
+        //         item.redirect = `${item.path}${item.children[0].path}`;
+        //     }
+        // });
+        // this.processItems(result);
+        return result;
+    }
+
+    processItems(data: any[]) {
+        data.forEach((item) => {
+            // Check if isExt is 0 and children is an empty array
+
+            if (item.isExt === 0 && item.children.length === 0) {
+                item.meta.hideMenu = false;
+            }
+
+            // If item has children, recursively process them
+            if (item.children.length > 0) {
+                this.processItems(item.children);
+            }
+        });
     }
 }
