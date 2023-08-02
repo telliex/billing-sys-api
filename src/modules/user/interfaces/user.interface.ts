@@ -5,7 +5,8 @@ export interface SnakeTypeUserItem {
     nickname: string;
     email: string;
     remark: string;
-    roles: string;
+    rolesString: string;
+    roles: any[];
     status: number;
     add_master: number;
     add_master_name: string;
@@ -22,7 +23,8 @@ export interface CamelTypeUserItem {
     nickname: string;
     email: string;
     remark: string;
-    roles: string;
+    rolesString: string;
+    roles: any[];
     status: number;
     addMaster: number;
     addMasterName: string;
@@ -39,7 +41,8 @@ export interface User {
     readonly nickname: string;
     readonly email: string;
     readonly remark: string;
-    readonly roles: string;
+    readonly roles: any[];
+    readonly rolesString: string;
     readonly status: number;
     readonly addMaster: number;
     readonly addMasterName: string;

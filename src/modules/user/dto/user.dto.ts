@@ -44,7 +44,9 @@ export class UserDto {
     homePath: string;
 
     @IsString()
-    roles: string;
+    @Expose({ name: 'roles_string' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
+    rolesString: string;
 
     @IsInt()
     @IsNotEmpty({ groups: ['update'], message: 'user required' })

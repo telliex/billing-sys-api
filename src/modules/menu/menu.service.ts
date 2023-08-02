@@ -15,6 +15,7 @@ import {
     checkHeaders,
 } from '../restful/helpers';
 
+import { Role } from '../role/entities/role.entity';
 import { User } from '../user/entities/user.entity';
 
 import { Menu } from './entities/menu.entity';
@@ -27,6 +28,8 @@ export class MenuService {
         private menuRepository: Repository<Menu>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        @InjectRepository(Role)
+        private roleRepository: Repository<Role>,
         @InjectRepository(MenuButtons)
         private buttonRepository: Repository<MenuButtons>,
     ) {}
@@ -94,7 +97,33 @@ export class MenuService {
     // show the dynimic menu list
     async findDynimicMenuList(headers: HeaderParamDto, query: any): Promise<NavItem[]> {
         checkHeaders(headers);
+        const user = Number(headers['user-id']);
+        // get target user roles's keys
+        const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
 
+        const rolesJSONArray = targetUser.roles_string ? JSON.parse(targetUser.roles_string) : [];
+        const rolesKeyArray: string[] = rolesJSONArray.map(
+            (item: { fieldKey: string; fieldValue: string }) => item.fieldKey,
+        );
+
+        const rolesAll = await this.roleRepository.find({
+            where: rolesKeyArray.map((item) => {
+                return { id: item };
+            }),
+        });
+
+        let rolesAllPermissionsKeys: any[] = [];
+        rolesAll.forEach((item) => {
+            if (item.menu_permission !== '') {
+                rolesAllPermissionsKeys = [
+                    ...rolesAllPermissionsKeys,
+                    ...item.menu_permission.split(','),
+                ];
+            }
+        });
+
+        // console.log('rolesAll:', rolesAll);
+        // console.log('rolesAllPermissionsKeys:', rolesAllPermissionsKeys);
         const temp: any[] = await this.menuRepository.find({
             where: {
                 menu_name: query.menuName ? query.menuName : null,
@@ -107,12 +136,14 @@ export class MenuService {
         });
 
         const newTemp = temp
-            // .filter((item) => item.type !== 'button')
+            // .filter((item) => rolesAllPermissionsKeys.includes(item.id))
+            .filter((item) => item.type !== 'button')
             .map((item) => {
                 return {
                     id: item.id,
                     type: item.type,
                     path: item.route_path,
+                    title: item.alias,
                     name: item.alias,
                     status: item.status,
                     component: item.component,
@@ -125,6 +156,7 @@ export class MenuService {
                         title: item.alias,
                         hideChildrenInMenu: false,
                         icon: item.icon,
+                        ignoreKeepAlive: item.is_cache !== 1,
                     },
                     children: [],
                 };

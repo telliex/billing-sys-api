@@ -47,6 +47,9 @@ export class User {
     @Column({ comment: 'token', type: 'varchar', width: 255, nullable: false })
     token: string;
 
+    @Column({ comment: 'role string', type: 'varchar', length: 1000, nullable: false })
+    roles_string: string;
+
     @Column({ comment: 'dept', type: 'varchar', width: 255, default: '', nullable: false })
     dept: string;
 
