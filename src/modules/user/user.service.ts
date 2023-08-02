@@ -71,8 +71,6 @@ export class UserService {
             temp.addTime ? offsetUtCTime(temp.addTime, headers['time-zone']) : '';
             return temp;
         });
-        console.log('output=======');
-        console.log(output);
         return output;
     }
 

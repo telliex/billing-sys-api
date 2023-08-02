@@ -108,10 +108,19 @@ export class MenuService {
 
         const rolesAll = await this.roleRepository.find({
             where: rolesKeyArray.map((item) => {
-                return { id: item };
+                return { id: item, status: 1 };
             }),
         });
 
+        // const tempPlus: any[] = await this.menuRepository.find({
+        //     where: {
+        //         menu_name: query.menuName ? query.menuName : null,
+        //         alias: query.alias ? query.alias : null,
+        //         status: 1,
+        //     }
+        // });
+
+        // merge all permissions
         let rolesAllPermissionsKeys: any[] = [];
         rolesAll.forEach((item) => {
             if (item.menu_permission !== '') {
@@ -123,8 +132,9 @@ export class MenuService {
         });
 
         // console.log('rolesAll:', rolesAll);
-        // console.log('rolesAllPermissionsKeys:', rolesAllPermissionsKeys);
-        const temp: any[] = await this.menuRepository.find({
+        // console.log('rolesAllPermissionsKeys===============:', rolesAllPermissionsKeys);
+
+        let temp: any[] = await this.menuRepository.find({
             where: {
                 menu_name: query.menuName ? query.menuName : null,
                 alias: query.alias ? query.alias : null,
@@ -135,9 +145,36 @@ export class MenuService {
             },
         });
 
-        const newTemp = temp
+        temp = temp.filter((item) => item.type !== 'button');
+        console.log('temp===============:', temp);
+        const map: any = {};
+
+        temp.forEach((item) => {
+            map[item.id] = item;
+        });
+        const xx: any[] = [];
+        const container: string[] = [];
+        rolesAllPermissionsKeys.forEach((item) => {
+            temp.forEach((subItem) => {
+                if (item === subItem.id && subItem.type !== 'button') {
+                    container.push(item);
+                    //  &&  !rolesAllPermissionsKeys.includes(subItem.parent_menu
+                    if (subItem.parent_menu !== '') {
+                        if (!container.includes(subItem.parent_menu)) {
+                            xx.push(map[subItem.parent_menu]);
+                        }
+                        xx.push(subItem);
+                    } else {
+                        xx.push(subItem);
+                    }
+                }
+            });
+        });
+        console.log('xx===============:', xx);
+
+        const newTemp = xx
             // .filter((item) => rolesAllPermissionsKeys.includes(item.id))
-            .filter((item) => item.type !== 'button')
+            // .filter((item) => item.type !== 'button')
             .map((item) => {
                 return {
                     id: item.id,

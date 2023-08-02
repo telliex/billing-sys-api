@@ -26,7 +26,7 @@ export class Role {
     @Column({
         comment: 'menu permission',
         type: 'varchar',
-        length: 1000,
+        length: 20000,
         default: '',
         nullable: true,
     })
