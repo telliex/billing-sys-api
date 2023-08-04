@@ -125,8 +125,7 @@ export class MenuService {
         rolesAll.forEach((item) => {
             if (item.menu_permission !== '') {
                 rolesAllPermissionsKeys = [
-                    ...rolesAllPermissionsKeys,
-                    ...item.menu_permission.split(','),
+                    ...new Set([...rolesAllPermissionsKeys, ...item.menu_permission.split(',')]),
                 ];
             }
         });

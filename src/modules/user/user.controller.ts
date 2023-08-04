@@ -49,4 +49,8 @@ export class UserController {
     remove(@Headers() headers: HeaderParamDto, @Param('id') id: string) {
         return this.userService.remove(id, headers);
     }
+
+    findUserByMGTId(@Headers() headers: HeaderParamDto, @Query('mgtNumber') mgtNumber: number) {
+        return this.userService.findUserByMGTId(mgtNumber);
+    }
 }

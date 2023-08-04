@@ -4,16 +4,13 @@ import { AppController } from './app.controller';
 import { database } from './config';
 import { KeepaliveController } from './keepalive/keepalive.controller';
 import { InitMiddleware } from './middleware/init.middleware';
+import { AuthModule } from './modules/auth/auth.module';
 import { DatabaseModule } from './modules/database/database.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { MenuButtonsModule } from './modules/menu-buttons/menu-buttons.module';
 import { RoleModule } from './modules/role/role.module';
 import { UserModule } from './modules/user/user.module';
-
-import { JwtStrategy } from './common/jwt.strategy';
-
-import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
     imports: [
@@ -24,9 +21,10 @@ import { AuthModule } from './modules/auth/auth.module';
         UserModule,
         DepartmentModule,
         MenuButtonsModule,
+        AuthModule,
     ],
     controllers: [AppController, KeepaliveController],
-    providers: [JwtStrategy,AuthModule],
+    providers: [],
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {

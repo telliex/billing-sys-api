@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 import { isNil } from 'lodash';
 import moment from 'moment';
 import { Like, Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+
 import { HeaderParamDto } from '../restful/dto';
 
 import {
@@ -77,41 +78,34 @@ export class UserService {
     }
 
     async findOne(query: any, headers: HeaderParamDto) {
-      checkHeaders(headers);
-      let target: any = await this.userRepository.findOneBy(
-        {id:query.id}
-      );
+        checkHeaders(headers);
+        const target: any = await this.userRepository.findOneBy({ id: query.id });
 
-          const output: any = snakeCaseToCamelCase(target);
-          output.changeTime ? offsetUtCTime(output.changeTime, headers['time-zone']) : '';
-          output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
+        const output: any = snakeCaseToCamelCase(target);
+        output.changeTime ? offsetUtCTime(output.changeTime, headers['time-zone']) : '';
+        output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
 
-
-      return output;
+        return output;
     }
 
     // inner
     async findUserByMGTId(MGTId: number) {
-      let target: any = await this.userRepository.findOneBy(
-        {mgt_number:MGTId}
-      );
-      return target;
+        const target: any = await this.userRepository.findOneBy({ mgt_number: MGTId });
+        return target;
     }
+
     // inner
     async findUserById(userId: string) {
-      let target: any = await this.userRepository.findOneBy(
-        {id:userId}
-      );
-      return target;
+        const target: any = await this.userRepository.findOneBy({ id: userId });
+        return target;
     }
 
     // inner
     async comparePasswords(inputPassword: string, hashedPassword: string): Promise<boolean> {
-      // 在這裡使用 bcrypt 或其他合適的方法來比對密碼是否相符
-      // 這裡僅為示範，實際上應使用適當的哈希函數進行比對
-      return inputPassword === hashedPassword;
+        // 在這裡使用 bcrypt 或其他合適的方法來比對密碼是否相符
+        // 這裡僅為示範，實際上應使用適當的哈希函數進行比對
+        return inputPassword === hashedPassword;
     }
-
 
     async findOneIfExist(
         param: {
@@ -134,7 +128,6 @@ export class UserService {
         }
         return true;
     }
-
 
     async update(id: string, updateDto: UserDto, headers: HeaderParamDto) {
         checkHeaders(headers);

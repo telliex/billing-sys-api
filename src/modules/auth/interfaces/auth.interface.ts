@@ -1,6 +1,4 @@
 export interface AuthParam {
-  mgtNumber: number;
-  password: string
+    mgtNumber: number;
+    password: string;
 }
-
-
