@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { isNil } from 'lodash';
 import moment from 'moment';
 import { Like, Repository } from 'typeorm';
-
+import * as bcrypt from 'bcrypt';
 import { HeaderParamDto } from '../restful/dto';
 
 import {
@@ -27,6 +27,7 @@ export class UserService {
 
     async create(createDto: UserDto, headers: HeaderParamDto) {
         checkHeaders(headers);
+        const hashedPassword = await bcrypt.hash(createDto.password, 10);
         const newItem = Object.assign(
             this.userRepository.create(),
             camelCaseToSnakeCase(createDto),
@@ -34,6 +35,7 @@ export class UserService {
         const user = Number(headers['user-id']);
         const target = await this.userRepository.findOneBy({ mgt_number: user });
         newItem.id = undefined;
+        newItem.password = hashedPassword;
         newItem.add_master = user;
         newItem.add_master_name = target.user_name;
         newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
@@ -74,6 +76,43 @@ export class UserService {
         return output;
     }
 
+    async findOne(query: any, headers: HeaderParamDto) {
+      checkHeaders(headers);
+      let target: any = await this.userRepository.findOneBy(
+        {id:query.id}
+      );
+
+          const output: any = snakeCaseToCamelCase(target);
+          output.changeTime ? offsetUtCTime(output.changeTime, headers['time-zone']) : '';
+          output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
+
+
+      return output;
+    }
+
+    // inner
+    async findUserByMGTId(MGTId: number) {
+      let target: any = await this.userRepository.findOneBy(
+        {mgt_number:MGTId}
+      );
+      return target;
+    }
+    // inner
+    async findUserById(userId: string) {
+      let target: any = await this.userRepository.findOneBy(
+        {id:userId}
+      );
+      return target;
+    }
+
+    // inner
+    async comparePasswords(inputPassword: string, hashedPassword: string): Promise<boolean> {
+      // 在這裡使用 bcrypt 或其他合適的方法來比對密碼是否相符
+      // 這裡僅為示範，實際上應使用適當的哈希函數進行比對
+      return inputPassword === hashedPassword;
+    }
+
+
     async findOneIfExist(
         param: {
             userName: string;
@@ -96,10 +135,6 @@ export class UserService {
         return true;
     }
 
-    findOne(id: string, headers: HeaderParamDto) {
-        checkHeaders(headers);
-        return `This action returns a #${id} user`;
-    }
 
     async update(id: string, updateDto: UserDto, headers: HeaderParamDto) {
         checkHeaders(headers);

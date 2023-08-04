@@ -11,6 +11,10 @@ import { MenuButtonsModule } from './modules/menu-buttons/menu-buttons.module';
 import { RoleModule } from './modules/role/role.module';
 import { UserModule } from './modules/user/user.module';
 
+import { JwtStrategy } from './common/jwt.strategy';
+
+import { AuthModule } from './modules/auth/auth.module';
+
 @Module({
     imports: [
         // CoreModule.forRoot(database()),
@@ -22,7 +26,7 @@ import { UserModule } from './modules/user/user.module';
         MenuButtonsModule,
     ],
     controllers: [AppController, KeepaliveController],
-    providers: [],
+    providers: [JwtStrategy,AuthModule],
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
