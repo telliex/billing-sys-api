@@ -12,4 +12,8 @@ export class HeaderParamDto {
     @IsString()
     @IsNotEmpty({ message: 'time zone required' })
     'time-zone': string;
+
+    @IsString()
+    @IsNotEmpty({ message: 'Authorization zone required' })
+    'Authorization': string;
 }

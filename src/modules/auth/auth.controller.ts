@@ -1,11 +1,12 @@
-import { Controller, Get, Headers, Query, Param, Post, Body } from '@nestjs/common';
+import { Controller, Get, Headers, Query, Param, Post, Body, UseGuards} from '@nestjs/common';
 
 import { HeaderParamDto } from '../restful/dto';
 
 import { AuthService } from './auth.service';
 import { AuthParam } from './interfaces/auth.interface';
+import { JwtAuthGuard } from '../../common/jwt-auth.guard';
 
-@Controller('auth')
+@Controller('api/v1.0/system/auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
@@ -15,11 +16,12 @@ export class AuthController {
     }
 
     @Get('logout')
+    @UseGuards(JwtAuthGuard)
     logout(@Headers() headers: HeaderParamDto, @Param('id') id: string) {
         return this.authService.logout(id, headers);
     }
 
-    @Post()
+    @Post('login')
     async login(
         @Headers() headers: HeaderParamDto,
         @Body()

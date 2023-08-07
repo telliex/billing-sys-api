@@ -87,7 +87,6 @@ export class UserService {
 
         return output;
     }
-
     // inner
     async findUserByMGTId(MGTId: number) {
         const target: any = await this.userRepository.findOneBy({ mgt_number: MGTId });
