@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository} from 'typeorm';
 import { HeaderParamDto } from '../restful/dto';
-import { checkHeaders, getRequestToken, resultError, resultSuccess } from '../restful/helpers';
+import { checkHeaders, resultError, resultSuccess } from '../restful/helpers';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 
@@ -56,25 +56,22 @@ export class AuthService {
     async logout(query: any, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const token = getRequestToken(headers).replace('Bearer','').trim();
+        //const token = getRequestToken(headers).replace('Bearer','').trim();
 
         const user = Number(headers['user-id']);
 
-        let result = this.jwtService.verify(token)
-        console.log('result:',result)
-
-        if (!result) return resultError('Invalid token');
+        // let result = this.jwtService.verify(token)
+        // if (!result) return resultError('Invalid token');
 
         const target = await this.userService.findUserByMGTId(user);
 
-        const checkUser = target.id === result.id;
-        if (!checkUser) {
+        // const checkUser = target.id === result.id;
+        // if (!checkUser) {
+        //     return resultError('Invalid token!');
+        // }
 
-            return resultError('Invalid token!');
-        }
-
-        // target.token = ''
-        // this.userRepository.save(target);
+        target.token = ''
+        this.userRepository.save(target);
         return resultSuccess(undefined, { msg: 'Token has been destroyed' });
     }
 
@@ -133,12 +130,16 @@ export class AuthService {
             userId: target.mgt_number,
             username: target.user_name,
             nickname: target.nickname,
-            token: userToken,
             realName: target.real_name,
+            avatar: target.avatar,
+            token: userToken,
+            system: target.system,
+            company: target.company,
+            homePath: target.home_path,
             remark: target.remark,
-            roles: JSON.stringify(target.roles_string
+            roles: target.roles_string
               ? JSON.parse(target.roles_string).map((item: any) => item.label)
-              : []),
+              : [],
         });
     }
 }
