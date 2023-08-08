@@ -123,7 +123,8 @@ export class MenuService {
         // merge all permissions
         let rolesAllPermissionsKeys: any[] = [];
         rolesAll.forEach((item) => {
-            if (item.menu_permission !== '') {
+            console.log('99999999:', item);
+            if (item.menu_permission && item.menu_permission !== '') {
                 rolesAllPermissionsKeys = [
                     ...new Set([...rolesAllPermissionsKeys, ...item.menu_permission.split(',')]),
                 ];

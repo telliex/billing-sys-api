@@ -1,4 +1,17 @@
-import { Controller, Get, Headers, Query, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Headers,
+    Query,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    UseGuards,
+} from '@nestjs/common';
+
+import { JwtAuthGuard } from '@/common/jwt-auth.guard';
 
 import { HeaderParamDto } from '../restful/dto';
 
@@ -14,6 +27,7 @@ export class MenuController {
 
     // Create the menu item
     @Post()
+    @UseGuards(JwtAuthGuard)
     // @UsePipes(
     //     new ValidationPipe({
     //         transform: true, // 將請求數據自動轉換為 DTO 對象
@@ -30,12 +44,14 @@ export class MenuController {
 
     // List the menu list
     @Get()
+    @UseGuards(JwtAuthGuard)
     async findAll(@Headers() headers: HeaderParamDto, @Query() filterParam: FilterParamDto) {
         // const { limit, offset } = paginationQuery;
         return this.menuService.findAll(filterParam, headers);
     }
 
     @Get('tree')
+    @UseGuards(JwtAuthGuard)
     async findTreeListWithButton(
         @Headers() headers: HeaderParamDto,
         @Query() filterParam: FilterParamDto,
@@ -45,6 +61,7 @@ export class MenuController {
     }
 
     @Get('nav')
+    // @UseGuards(JwtAuthGuard)
     async findDynimicMenuList(
         @Headers() headers: HeaderParamDto,
         @Query() filterParam: FilterParamDto,
@@ -55,6 +72,7 @@ export class MenuController {
 
     // Get the menu item
     @Get(':id')
+    @UseGuards(JwtAuthGuard)
     async findOne(@Headers() headers: HeaderParamDto, @Param('id') id: string) {
         // return `This is menu ${id} .`;
         return this.menuService.findOne(id, headers);
@@ -62,6 +80,7 @@ export class MenuController {
 
     // cover the menu item
     @Patch(':id')
+    @UseGuards(JwtAuthGuard)
     // @UsePipes(
     //     new ValidationPipe({
     //         transform: true, // 將請求數據自動轉換為 DTO 對象
@@ -79,6 +98,7 @@ export class MenuController {
 
     // Delete the menu item
     @Delete(':id')
+    @UseGuards(JwtAuthGuard)
     async remove(@Headers() headers: HeaderParamDto, @Param('id') id: string): Promise<MenuDto> {
         return this.menuService.remove(id, headers);
     }

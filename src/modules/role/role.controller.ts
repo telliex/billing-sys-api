@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Query } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    Headers,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
+
+import { JwtAuthGuard } from '@/common/jwt-auth.guard';
 
 import { HeaderParamDto } from '../restful/dto';
 
@@ -11,21 +24,25 @@ export class RoleController {
     constructor(private readonly roleService: RoleService) {}
 
     @Post()
+    @UseGuards(JwtAuthGuard)
     async create(@Headers() headers: HeaderParamDto, @Body() createDto: RoleDto) {
         return this.roleService.create(createDto, headers);
     }
 
     @Get()
+    @UseGuards(JwtAuthGuard)
     findAll(@Headers() headers: HeaderParamDto, @Query() filterParam: FilterParamDto) {
         return this.roleService.findAll(filterParam, headers);
     }
 
     @Get(':id')
+    @UseGuards(JwtAuthGuard)
     findOne(@Headers() headers: HeaderParamDto, @Param('id') id: string) {
         return this.roleService.findOne(id, headers);
     }
 
     @Patch(':id')
+    @UseGuards(JwtAuthGuard)
     async update(
         @Headers() headers: HeaderParamDto,
         @Param('id') id: string,
@@ -35,6 +52,7 @@ export class RoleController {
     }
 
     @Patch('status/:id')
+    @UseGuards(JwtAuthGuard)
     async setRoleStatus(
         @Headers() headers: HeaderParamDto,
         @Param('id') id: string,
@@ -45,6 +63,7 @@ export class RoleController {
     }
 
     @Delete(':id')
+    @UseGuards(JwtAuthGuard)
     async remove(@Headers() headers: HeaderParamDto, @Param('id') id: string) {
         return this.roleService.remove(id, headers);
     }

@@ -40,7 +40,7 @@ export function checkHeaders(headers: any) {
 // TODO
 export function resultError(
     msg = 'Request failed',
-    { code = ResultEnum.ERROR, status = BillingResultEnum.ERROR, results = 1 } = {},
+    { code = ResultEnum.ERROR, status = BillingResultEnum.ERROR, results = '' } = {},
 ) {
     return {
         trace_id: Guid.newGuid().toString(),
@@ -50,7 +50,7 @@ export function resultError(
         msg,
         type: 'error',
         requested_time: '',
-        responsed_time: '',
+        responsed_time: new Date(),
     };
 }
 
@@ -64,7 +64,7 @@ export function resultSuccess<T = any>(results: T, { msg = 'ok' } = {}) {
         msg, // add by Telliex
         type: 'success',
         requested_time: '',
-        responsed_time: '',
+        responsed_time: new Date(),
     };
 }
 

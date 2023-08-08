@@ -3,7 +3,8 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository} from 'typeorm';
+import { Repository } from 'typeorm';
+
 import { HeaderParamDto } from '../restful/dto';
 import { checkHeaders, resultError, resultSuccess } from '../restful/helpers';
 import { User } from '../user/entities/user.entity';
@@ -22,12 +23,10 @@ export class AuthService {
         return this.validateUser(mgtNumber, password);
     }
 
-
-
     async validateUser(mgtNumber: number, password: string): Promise<any> {
         const user = await this.userService.findUserByMGTId(mgtNumber);
         if (!user) {
-          return resultError(' MGT number does not exist！');
+            return resultError(' MGT number does not exist！');
         }
         if (user && (await this.userService.comparePasswords(password, user.password))) {
             // 密碼驗證成功，生成 JWT
@@ -53,11 +52,8 @@ export class AuthService {
         return user;
     }
 
-    async logout(query: any, headers: HeaderParamDto) {
+    async logout(headers: HeaderParamDto) {
         checkHeaders(headers);
-
-        //const token = getRequestToken(headers).replace('Bearer','').trim();
-
         const user = Number(headers['user-id']);
 
         // let result = this.jwtService.verify(token)
@@ -70,7 +66,7 @@ export class AuthService {
         //     return resultError('Invalid token!');
         // }
 
-        target.token = ''
+        target.token = '';
         this.userRepository.save(target);
         return resultSuccess(undefined, { msg: 'Token has been destroyed' });
     }
@@ -88,41 +84,43 @@ export class AuthService {
 
         let userToken = '';
 
-        if(target.token){ // already has token
-          console.log('already has token:')
-          try {
-            const decodedToken = this.jwtService.verify(target.token);
-            const expirationDate = new Date(decodedToken.exp * 1000); // 將秒轉換為毫秒
+        if (target.token) {
+            // already has token
+            console.log('already has token:');
+            try {
+                const decodedToken = this.jwtService.verify(target.token);
+                const expirationDate = new Date(decodedToken.exp * 1000); // 將秒轉換為毫秒
 
-            if (expirationDate <= new Date()) {
-              // Token 已過期，進行相應處理
+                if (expirationDate <= new Date()) {
+                    // Token 已過期，進行相應處理
 
-              console.log('Token has expired.');
-              target.token='';
-              this.userRepository.save(target);
-              return resultError('Token has expired.'); // 返回 false 表示不允許請求繼續處理
-            }else{
-              console.log('now time:',new Date());
-              console.log('expired time:',expirationDate)
-              console.log('not yet expired')
-              userToken = target.token
+                    console.log('Token has expired.');
+                    target.token = '';
+                    this.userRepository.save(target);
+                    return resultError('Token has expired.'); // 返回 false 表示不允許請求繼續處理
+                }
+                console.log('now time:', new Date());
+                console.log('expired time:', expirationDate);
+                console.log('not yet expired');
+                userToken = target.token;
+            } catch (err) {
+                // Token verification failed.
+                target.token = '';
+                this.userRepository.save(target);
+                console.log('Token verification failed:', err);
+                return resultError('Token verification failed.'); // 返回 false 表示不允許請求繼續處理
             }
-          } catch (err) {
-            // Token verification failed.
-            target.token='';
-            this.userRepository.save(target);
-            console.log('Token verification failed:', err);
-            return resultError('Token verification failed.'); // 返回 false 表示不允許請求繼續處理
-          }
-
-
-        }else{ // new
-          console.log('new get token')
-          userToken = await this.validateUser(mgtNumber, password)
+        } else {
+            // new
+            console.log('new get token');
+            userToken = await this.validateUser(mgtNumber, password);
+            console.log('userToken:', userToken);
+            if (!userToken) {
+                return resultError('Password verification failed.');
+            }
         }
 
-
-        target.token = userToken ? String(userToken) : ''
+        target.token = userToken ? String(userToken) : '';
         this.userRepository.save(target);
 
         return resultSuccess({
@@ -133,13 +131,14 @@ export class AuthService {
             realName: target.real_name,
             avatar: target.avatar,
             token: userToken,
+            password: target.password,
             system: target.system,
             company: target.company,
             homePath: target.home_path,
             remark: target.remark,
             roles: target.roles_string
-              ? JSON.parse(target.roles_string).map((item: any) => item.label)
-              : [],
+                ? JSON.parse(target.roles_string).map((item: any) => item.label)
+                : [],
         });
     }
 }

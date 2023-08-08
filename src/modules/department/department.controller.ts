@@ -1,10 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Query, UseGuards } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    Headers,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
+
+import { JwtAuthGuard } from '@/common/jwt-auth.guard';
 
 import { HeaderParamDto } from '../restful/dto';
 
 import { DepartmentService } from './department.service';
 import { DepartmentDto, FilterParamDto } from './dto';
-import { JwtAuthGuard } from '../../common/jwt-auth.guard';
 
 @Controller('api/v1.0/system/department')
 export class DepartmentController {

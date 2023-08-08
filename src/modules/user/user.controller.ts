@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Query } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    Headers,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
+
+import { JwtAuthGuard } from '@/common/jwt-auth.guard';
 
 import { HeaderParamDto } from '../restful/dto';
 
@@ -10,16 +23,19 @@ export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @Post()
+    @UseGuards(JwtAuthGuard)
     create(@Headers() headers: HeaderParamDto, @Body() createDto: UserDto) {
         return this.userService.create(createDto, headers);
     }
 
     @Get()
+    @UseGuards(JwtAuthGuard)
     findAll(@Headers() headers: HeaderParamDto, @Query() filterParam: FilterParamDto) {
         return this.userService.findAll(filterParam, headers);
     }
 
     @Get('exist')
+    @UseGuards(JwtAuthGuard)
     findOneIfExist(
         @Headers() headers: HeaderParamDto,
         @Query()
@@ -32,11 +48,13 @@ export class UserController {
     }
 
     @Get(':id')
+    @UseGuards(JwtAuthGuard)
     findOne(@Headers() headers: HeaderParamDto, @Param('id') id: string) {
         return this.userService.findOne(id, headers);
     }
 
     @Patch(':id')
+    @UseGuards(JwtAuthGuard)
     update(
         @Headers() headers: HeaderParamDto,
         @Param('id') id: string,
@@ -46,6 +64,7 @@ export class UserController {
     }
 
     @Delete(':id')
+    @UseGuards(JwtAuthGuard)
     remove(@Headers() headers: HeaderParamDto, @Param('id') id: string) {
         return this.userService.remove(id, headers);
     }
