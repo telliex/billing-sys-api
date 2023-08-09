@@ -18,7 +18,7 @@ import { AuthService } from './auth.service';
         TypeOrmModule.forFeature([User]),
         JwtModule.register({
             secret: jwtConstants.secret,
-            signOptions: { expiresIn: '0.05h' }, // 設定 JWT 的過期時間
+            signOptions: { expiresIn: '1h' }, // 設定 JWT 的過期時間
         }),
     ],
     controllers: [AuthController],

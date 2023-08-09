@@ -123,7 +123,6 @@ export class MenuService {
         // merge all permissions
         let rolesAllPermissionsKeys: any[] = [];
         rolesAll.forEach((item) => {
-            console.log('99999999:', item);
             if (item.menu_permission && item.menu_permission !== '') {
                 rolesAllPermissionsKeys = [
                     ...new Set([...rolesAllPermissionsKeys, ...item.menu_permission.split(',')]),
@@ -146,7 +145,6 @@ export class MenuService {
         });
 
         temp = temp.filter((item) => item.type !== 'button');
-        console.log('temp===============:', temp);
         const map: any = {};
 
         temp.forEach((item) => {
@@ -170,8 +168,7 @@ export class MenuService {
                 }
             });
         });
-        console.log('xx===============:', xx);
-
+        console.log('xx==============', xx);
         const newTemp = xx
             // .filter((item) => rolesAllPermissionsKeys.includes(item.id))
             // .filter((item) => item.type !== 'button')

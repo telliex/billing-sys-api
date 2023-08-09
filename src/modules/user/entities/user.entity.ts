@@ -57,10 +57,10 @@ export class User {
         comment: 'dept',
         type: 'varchar',
         width: 255,
-        default: 'ECloudvalley',
+        default: 'ECloudValley',
         nullable: false,
     })
-    compnay: string;
+    company: string;
 
     @Column({ comment: 'dept', type: 'varchar', width: 255, default: 'CRS', nullable: false })
     system: string;

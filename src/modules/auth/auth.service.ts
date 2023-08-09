@@ -3,6 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isJWT } from 'class-validator';
 import { Repository } from 'typeorm';
 
 import { HeaderParamDto } from '../restful/dto';
@@ -73,18 +74,23 @@ export class AuthService {
 
     async login(body: any, headers: HeaderParamDto) {
         checkHeaders(headers);
-        const { password, mgtNumber } = body;
+        console.log('body:', body);
+        const { password, username } = body;
 
         // get User info
-        const target = await this.userService.findUserByMGTId(mgtNumber);
+        const target = await this.userService.findUserByMGTId(username);
         // To check if user available
         if (!target) {
-            return resultError(' MGT number does not exist！');
+            return resultError('MGT number does not exist！');
+        }
+
+        if (!isJWT(target.token)) {
+            console.log('not jwt!!');
         }
 
         let userToken = '';
 
-        if (target.token) {
+        if (isJWT(target.token) && target.token) {
             // already has token
             console.log('already has token:');
             try {
@@ -113,7 +119,7 @@ export class AuthService {
         } else {
             // new
             console.log('new get token');
-            userToken = await this.validateUser(mgtNumber, password);
+            userToken = await this.validateUser(username, password);
             console.log('userToken:', userToken);
             if (!userToken) {
                 return resultError('Password verification failed.');
@@ -122,7 +128,7 @@ export class AuthService {
 
         target.token = userToken ? String(userToken) : '';
         this.userRepository.save(target);
-
+        console.log('==========', target);
         return resultSuccess({
             email: target.email,
             userId: target.mgt_number,
@@ -137,7 +143,12 @@ export class AuthService {
             homePath: target.home_path,
             remark: target.remark,
             roles: target.roles_string
-                ? JSON.parse(target.roles_string).map((item: any) => item.label)
+                ? JSON.parse(target.roles_string).map((item: any) => {
+                      return {
+                          roleName: item.label,
+                          value: item.roleValue,
+                      };
+                  })
                 : [],
         });
     }
