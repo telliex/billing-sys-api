@@ -116,16 +116,23 @@ export class UserService {
     ) {
         checkHeaders(headers);
         console.log('param:', param);
-        const targetId = await this.userRepository.findOneBy({ id: param.id });
+        let targetId = null;
+        if (param.id) {
+            targetId = await this.userRepository.findOneBy({ id: param.id });
+        }
+
         const targetUserName = await this.userRepository.findOneBy({ user_name: param.userName });
         console.log('targetId:', targetId);
         console.log('targetUserName:', targetUserName);
-        if (targetId.user_name === param.userName && targetUserName) {
-            return false;
-        }
+
         if (!targetUserName) {
             return false;
         }
+
+        if (targetId && targetId.user_name === param.userName && targetUserName) {
+            return false;
+        }
+
         return true;
     }
 
