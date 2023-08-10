@@ -52,7 +52,7 @@ export class UserService {
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
         console.log('output:', output);
-        return output;
+        return [output];
     }
 
     async findAll(query: any, headers: HeaderParamDto) {
@@ -87,6 +87,7 @@ export class UserService {
 
         return output;
     }
+
     // inner
     async findUserByMGTId(MGTId: number) {
         const target: any = await this.userRepository.findOneBy({ mgt_number: MGTId });
@@ -152,7 +153,7 @@ export class UserService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        return output;
+        return [output];
     }
 
     async remove(id: string, headers: HeaderParamDto) {
@@ -173,6 +174,6 @@ export class UserService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        return output;
+        return [output];
     }
 }

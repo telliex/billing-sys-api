@@ -77,7 +77,7 @@ export class MenuButtonsService {
         menu.menu_buttons = buttonList.map((item) => item.button_name).join(',');
         this.menuRepository.save(menu);
 
-        return output;
+        return [output];
     }
 
     async findAll(query: any, headers: HeaderParamDto) {
@@ -157,7 +157,7 @@ export class MenuButtonsService {
         menu.menu_buttons = buttonList.map((item) => item.button_name).join(',');
         this.menuRepository.save(menu);
 
-        return output;
+        return [output];
     }
 
     async remove(id: string, headers: HeaderParamDto) {
@@ -194,6 +194,6 @@ export class MenuButtonsService {
         menu.menu_buttons = buttonList.map((item) => item.button_name).join(',');
         this.menuRepository.save(menu);
 
-        return output;
+        return [output];
     }
 }

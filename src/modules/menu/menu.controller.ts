@@ -38,7 +38,7 @@ export class MenuController {
         @Headers() headers: HeaderParamDto,
         @Body()
         createDto: MenuDto,
-    ): Promise<MenuDto> {
+    ): Promise<MenuDto[]> {
         return this.menuService.create(createDto, headers);
     }
 
@@ -92,14 +92,14 @@ export class MenuController {
         @Param('id') id: string,
         @Body()
         updateMenuDto: MenuDto,
-    ): Promise<MenuDto> {
+    ): Promise<MenuDto[]> {
         return this.menuService.update(id, updateMenuDto, headers);
     }
 
     // Delete the menu item
     @Delete(':id')
     @UseGuards(JwtAuthGuard)
-    async remove(@Headers() headers: HeaderParamDto, @Param('id') id: string): Promise<MenuDto> {
+    async remove(@Headers() headers: HeaderParamDto, @Param('id') id: string): Promise<MenuDto[]> {
         return this.menuService.remove(id, headers);
     }
 }

@@ -98,17 +98,17 @@ export class MenuService {
     async findDynimicMenuList(headers: HeaderParamDto, query: any): Promise<NavItem[]> {
         checkHeaders(headers);
         const user = Number(headers['user-id']);
+
         // get target user roles's keys
         const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
-
         const rolesJSONArray = targetUser.roles_string ? JSON.parse(targetUser.roles_string) : [];
-        const rolesKeyArray: string[] = rolesJSONArray.map(
-            (item: { fieldKey: string; fieldValue: string }) => item.fieldKey,
-        );
-
+        // const rolesKeyArray: string[] = rolesJSONArray.map(
+        //     (item: { fieldKey: string; fieldValue: string }) => item.fieldKey,
+        // );
+        // console.log('88888888=======:', rolesKeyArray);
         const rolesAll = await this.roleRepository.find({
-            where: rolesKeyArray.map((item) => {
-                return { id: item, status: 1 };
+            where: rolesJSONArray.map((item: any) => {
+                return { id: item.key, status: 1 };
             }),
         });
 
@@ -296,7 +296,7 @@ export class MenuService {
     async create(
         createDto: CamelTypeMenuItem,
         headers: HeaderParamDto,
-    ): Promise<CamelTypeMenuItem> {
+    ): Promise<CamelTypeMenuItem[]> {
         checkHeaders(headers);
 
         const newItem = Object.assign(
@@ -324,14 +324,14 @@ export class MenuService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        return output;
+        return [output];
     }
 
     async update(
         id: string,
         updateDto: CamelTypeMenuItem,
         headers: HeaderParamDto,
-    ): Promise<CamelTypeMenuItem> {
+    ): Promise<CamelTypeMenuItem[]> {
         checkHeaders(headers);
         const targetItem = await this.menuRepository.findOneBy({ id });
 
@@ -356,10 +356,10 @@ export class MenuService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        return output;
+        return [output];
     }
 
-    async remove(id: string, headers: HeaderParamDto): Promise<CamelTypeMenuItem | null> {
+    async remove(id: string, headers: HeaderParamDto): Promise<CamelTypeMenuItem[] | null> {
         checkHeaders(headers);
         const targetItem = await this.menuRepository.findOneBy({ id });
 
@@ -375,7 +375,7 @@ export class MenuService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        return output;
+        return [output];
     }
 
     buildMenuNestedStructure(data: any[]) {
