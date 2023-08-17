@@ -28,6 +28,9 @@ export class Menu {
     @Column({ comment: 'menu alias name', type: 'varchar', width: 255, nullable: false })
     alias: string;
 
+    @Column({ comment: 'menu cache name', type: 'varchar', width: 255, nullable: false })
+    cache_name: string;
+
     @Column({ comment: 'description', type: 'varchar', width: 255, default: '', nullable: true })
     description: string;
 
@@ -75,8 +78,6 @@ export class Menu {
 
     @Column('datetime')
     add_time: string;
-    // @CreateDateColumn({ comment: 'created date' })
-    // add_time: Date;
 
     @Column({ comment: 'who changed by number', type: 'int', width: 11 })
     change_master: number;
@@ -86,8 +87,6 @@ export class Menu {
 
     @Column('datetime')
     change_time: string;
-    // @UpdateDateColumn({ comment: 'change date' })
-    // change_time: Date;
 }
 
 // export class MenuDto extends OmitType(Menu, [] as const) {}

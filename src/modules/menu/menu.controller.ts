@@ -61,7 +61,7 @@ export class MenuController {
     }
 
     @Get('nav')
-    // @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     async findDynimicMenuList(
         @Headers() headers: HeaderParamDto,
         @Query() filterParam: FilterParamDto,

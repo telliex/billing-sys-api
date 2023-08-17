@@ -18,18 +18,15 @@ export class User {
     mgt_number: number;
 
     @Column({ comment: 'user name', type: 'varchar', width: 255, nullable: false })
-    user_name: string;
+    user_name: string; // MGT keyname
 
     @Column({ comment: 'real name', type: 'varchar', width: 255, nullable: false })
-    real_name: string;
+    real_name: string; //
 
     @Column({ comment: 'nickname', type: 'varchar', width: 255, nullable: false })
     nickname: string;
 
-    @Column({ comment: 'Email', type: 'varchar', width: 255, nullable: false })
-    email: string;
-
-    @Column({ comment: 'avatar', type: 'varchar', width: 255, default: '', nullable: true })
+    @Column({ comment: 'avatar', type: 'varchar', width: 255, default: null, nullable: true })
     avatar: string;
 
     @Column({
@@ -42,7 +39,7 @@ export class User {
     remark: string;
 
     @Column({ comment: 'password', type: 'varchar', width: 255, nullable: false })
-    password: string;
+    password: string; // MGT keypassword
 
     @Column({ comment: 'token', type: 'varchar', width: 255, nullable: false })
     token: string;

@@ -1,0 +1,17 @@
+import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
+
+@Index("bill_customer", ["billCustomer"], {})
+@Entity("msp_billing_alert_log", { schema: "ecloud_rick" })
+export class MspBillingAlertLog {
+  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  id: number;
+
+  @Column("int", { name: "bill_customer" })
+  billCustomer: number;
+
+  @Column("int", { name: "estimated_charges" })
+  estimatedCharges: number;
+
+  @Column("varchar", { name: "alert_time", length: 30 })
+  alertTime: string;
+}

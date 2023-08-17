@@ -1,5 +1,7 @@
 // auth.service.ts
 
+import { createHash } from 'crypto';
+
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,7 +11,10 @@ import { Repository } from 'typeorm';
 import { HeaderParamDto } from '../restful/dto';
 import { checkHeaders, resultError, resultSuccess } from '../restful/helpers';
 import { User } from '../user/entities/user.entity';
+
 import { UserService } from '../user/user.service';
+
+import { BillMaster } from './entities/bill.master.entity';
 
 @Injectable()
 export class AuthService {
@@ -18,26 +23,31 @@ export class AuthService {
         private readonly jwtService: JwtService,
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        @InjectRepository(BillMaster)
+        private readonly billMasterRepository: Repository<BillMaster>,
     ) {}
 
     async requestToken(mgtNumber: number, password: string): Promise<any> {
-        return this.validateUser(mgtNumber, password);
-    }
-
-    async validateUser(mgtNumber: number, password: string): Promise<any> {
         const user = await this.userService.findUserByMGTId(mgtNumber);
         if (!user) {
-            return resultError(' MGT number does not exist！');
+            return null;
         }
-        if (user && (await this.userService.comparePasswords(password, user.password))) {
-            // 密碼驗證成功，生成 JWT
-            const payload = { mgtNumber: user.mgt_number, sub: user.id };
-            const accessToken = this.jwtService.sign(payload);
-            // return { access_token: accessToken };'
-            return accessToken;
+
+        // 密碼驗證成功，生成 JWT
+        const payload = { mgtNumber: user.mgt_number, sub: user.id };
+        const accessToken = this.jwtService.sign(payload);
+        // return { access_token: accessToken };'
+        return accessToken;
+    }
+
+    verifyToken(token: string): boolean {
+        try {
+            // 解析 JWT Token，並驗證是否過期
+            this.jwtService.verify(token);
+            return true; // 驗證通過，JWT Token 過期
+        } catch (error) {
+            return false; // 驗證失敗，JWT Token 過期或無效
         }
-        // 密碼驗證失敗，返回 null
-        return null;
     }
 
     async validateUserFromJwt(payload: any): Promise<any> {
@@ -51,6 +61,16 @@ export class AuthService {
 
         // 驗證成功，回傳用戶資訊
         return user;
+    }
+
+    hashPassword(password: string): string {
+        const hash = createHash('sha256');
+        hash.update(password);
+        return hash.digest('hex');
+    }
+
+    validatePassword(password: string, hash: string): boolean {
+        return this.hashPassword(password) === hash;
     }
 
     async logout(headers: HeaderParamDto) {
@@ -72,60 +92,59 @@ export class AuthService {
         return resultSuccess(undefined, { msg: 'Token has been destroyed' });
     }
 
+    async findBillUserByUsername(username: string): Promise<BillMaster | undefined> {
+        return this.billMasterRepository
+            .createQueryBuilder('BillMaster')
+            .where('keyname = :username', { username })
+            .getOne(); // 僅讀取，不會對 User 資料表進行寫入
+    }
+
     async login(body: any, headers: HeaderParamDto) {
         checkHeaders(headers);
         console.log('body:', body);
         const { password, username } = body;
 
+        // get User info from bill_master
+        const findBillUserByUsername = await this.findBillUserByUsername(username);
+        console.log('findBillUserByUsername:', findBillUserByUsername);
+        const checkPassword = this.validatePassword(password, findBillUserByUsername.keypassword);
+        if (!checkPassword) {
+            return resultError('Password is wrong!');
+        }
+
         // get User info
-        const target = await this.userService.findUserByMGTId(username);
+        const target = await this.userService.findUserByMGTId(findBillUserByUsername.id);
         // To check if user available
         if (!target) {
             return resultError('MGT number does not exist！');
         }
-
+        target.password = findBillUserByUsername.keypassword;
+        this.userRepository.save(target);
+        console.log('target:', target);
         if (!isJWT(target.token)) {
-            console.log('not jwt!!');
+            console.log('The format is not jwt!!');
         }
 
         let userToken = '';
+        const mgtId = findBillUserByUsername.id;
 
         if (isJWT(target.token) && target.token) {
             // already has token
-            console.log('already has token:');
-            try {
-                const decodedToken = this.jwtService.verify(target.token);
-                const expirationDate = new Date(decodedToken.exp * 1000); // 將秒轉換為毫秒
-
-                if (expirationDate <= new Date()) {
-                    // Token 已過期，進行相應處理
-
-                    console.log('Token has expired.');
-                    target.token = '';
-                    this.userRepository.save(target);
-                    return resultError('Token has expired.'); // 返回 false 表示不允許請求繼續處理
-                }
-                console.log('now time:', new Date());
-                console.log('expired time:', expirationDate);
-                console.log('not yet expired');
+            const decodedToken = this.verifyToken(target.token);
+            if (!decodedToken) {
+                userToken = await this.requestToken(mgtId, password);
+            } else {
                 userToken = target.token;
-            } catch (err) {
-                // Token verification failed.
-                target.token = '';
-                this.userRepository.save(target);
-                console.log('Token verification failed:', err);
-                return resultError('Token verification failed.'); // 返回 false 表示不允許請求繼續處理
             }
         } else {
             // new
-            console.log('new get token');
-            userToken = await this.validateUser(username, password);
+            console.log('new getting token');
+            userToken = await this.requestToken(mgtId, password);
             console.log('userToken:', userToken);
             if (!userToken) {
-                return resultError('Password verification failed.');
+                return resultError('Get Token failed.');
             }
         }
-
         target.token = userToken ? String(userToken) : '';
         this.userRepository.save(target);
         console.log('==========', target);
@@ -137,7 +156,7 @@ export class AuthService {
             realName: target.real_name,
             avatar: target.avatar,
             token: userToken,
-            password: target.password,
+            // password: target.password,
             system: target.system,
             company: target.company,
             homePath: target.home_path,

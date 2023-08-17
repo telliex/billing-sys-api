@@ -178,7 +178,7 @@ export class MenuService {
                     type: item.type,
                     path: item.route_path,
                     title: item.alias,
-                    name: item.alias,
+                    name: item.cache_name ? item.cache_name : item.alias,
                     status: item.status,
                     component: item.component,
                     isExt: item.is_ext,

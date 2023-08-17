@@ -34,7 +34,7 @@ export class MenuDto {
         message: 'Menu name content max length is 255',
     })
     @IsNotEmpty({ message: 'type required' })
-    @Expose({ name: 'menu_name' })
+    @Expose({ name: 'alias' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     alias: string;
 
@@ -103,6 +103,15 @@ export class MenuDto {
     @Expose({ name: 'is_cache' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     isCache: number;
+
+    @IsString()
+    @MaxLength(255, {
+        message: 'Route name content max length is 255',
+    })
+    @IsNotEmpty({ message: 'type required' })
+    @Expose({ name: 'cache_name' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
+    cacheName: string;
 
     @IsInt()
     @Expose({ name: 'is_show' })

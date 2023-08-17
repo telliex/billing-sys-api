@@ -12,6 +12,7 @@ export interface SnakeTypeMenuItem {
     parent_menu: string;
     is_ext: number;
     is_cache: number;
+    cache_name: string;
     is_show: number;
     status: number;
     menu_buttons: string;
@@ -38,6 +39,7 @@ export interface CamelTypeMenuItem {
     parentMenu: string;
     isExt: number;
     isCache: number;
+    cacheName: string;
     isShow: number;
     status: number;
     menuButtons: string;
@@ -64,6 +66,7 @@ export interface MenuItem {
     readonly parentMenu: string;
     readonly isExt: number;
     readonly isCache: number;
+    readonly cacheName: string;
     readonly isShow: number;
     readonly status: number;
     readonly menuButtons: string;
