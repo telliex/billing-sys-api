@@ -26,6 +26,9 @@ export class User {
     @Column({ comment: 'nickname', type: 'varchar', width: 255, nullable: false })
     nickname: string;
 
+    @Column({ comment: 'keyname', type: 'varchar', width: 255, nullable: false })
+    keyname: string;
+
     @Column({ comment: 'avatar', type: 'varchar', width: 255, default: null, nullable: true })
     avatar: string;
 
@@ -40,6 +43,9 @@ export class User {
 
     @Column({ comment: 'password', type: 'varchar', width: 255, nullable: false })
     password: string; // MGT keypassword
+
+    @Column({ comment: 'keypassword', type: 'varchar', width: 255, nullable: false })
+    keypassword: string; // MGT keypassword
 
     @Column({ comment: 'token', type: 'varchar', width: 255, nullable: false })
     token: string;

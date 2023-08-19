@@ -6,6 +6,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isJWT } from 'class-validator';
+import moment from 'moment';
 import { Repository } from 'typeorm';
 
 import { HeaderParamDto } from '../restful/dto';
@@ -28,7 +29,10 @@ export class AuthService {
     ) {}
 
     async requestToken(mgtNumber: number, password: string): Promise<any> {
+        console.log('000000000', mgtNumber);
+        console.log('000000000', password);
         const user = await this.userService.findUserByMGTId(mgtNumber);
+        console.log('000000000', user);
         if (!user) {
             return null;
         }
@@ -48,6 +52,38 @@ export class AuthService {
         } catch (error) {
             return false; // 驗證失敗，JWT Token 過期或無效
         }
+    }
+
+    processNameString(orgString: string): {
+        lastName: string;
+        firstName: string;
+    } {
+        if (orgString.includes('@')) {
+            const name = orgString.split('@')[0];
+            if (name.includes('.')) {
+                const nameArray = name.split('.');
+                return {
+                    lastName: nameArray[1].toLowerCase(),
+                    firstName: nameArray[0].toLowerCase(),
+                };
+            }
+            return {
+                lastName: '',
+                firstName: name.toLowerCase(),
+            };
+        }
+
+        if (orgString.includes('.')) {
+            const nameArray = orgString.split('.');
+            return {
+                lastName: nameArray[1].toLowerCase(),
+                firstName: nameArray[0].toLowerCase(),
+            };
+        }
+        return {
+            lastName: '',
+            firstName: orgString.toLowerCase(),
+        };
     }
 
     async validateUserFromJwt(payload: any): Promise<any> {
@@ -109,60 +145,105 @@ export class AuthService {
         console.log('findBillUserByUsername:', findBillUserByUsername);
         const checkPassword = this.validatePassword(password, findBillUserByUsername.keypassword);
         if (!checkPassword) {
-            return resultError('Password is wrong!');
+            return resultError('UserName or password is wrong!');
         }
 
         // get User info
         const target = await this.userService.findUserByMGTId(findBillUserByUsername.id);
+        const tempName = this.processNameString(findBillUserByUsername.keyname);
+        let newTarget = null;
         // To check if user available
         if (!target) {
-            return resultError('MGT number does not exist！');
+            console.log('aaaaaaa:', target);
+            newTarget = {
+                mgt_number: findBillUserByUsername.id,
+                user_name: `${tempName.firstName}.${tempName.lastName}`,
+                real_name: `${tempName.firstName}.${tempName.lastName}`,
+                nickname: findBillUserByUsername.name,
+                keyname: findBillUserByUsername.keypassword,
+                keypassword: findBillUserByUsername.keyname,
+                token: '',
+                remark: '',
+                roles: [],
+                roles_string:
+                    '[{"label":"default","value":"ac7649bc-46a4-491c-b4d5-919f4f44e613","key":"ac7649bc-46a4-491c-b4d5-919f4f44e613","option":{"roleValue":"default","remark":"normal rule","menuPermission":"fe8a905b-7c3c-4fb1-9c84-e9ac1ef86bd4","orderNo":100,"status":1,"addMaster":144,"addMasterName":"gladys.ding","addTime":"2023-08-03T04:10:08.000Z","changeMaster":144,"changeMasterName":"gladys.ding","changeTime":"2023-08-03T04:10:08.000Z","label":"default","value":"ac7649bc-46a4-491c-b4d5-919f4f44e613"},"originLabel":"default"}]',
+                dept: `e5d64b67-f525-4b7e-af40-a019fb39c9ba`,
+                system: `CRS`,
+                company: `ECloudValley`,
+                avatar: '',
+                status: 1,
+                add_master: 0,
+                add_master_name: 'default.Wang',
+                add_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
+                change_master: 0,
+                change_master_name: 'default.Wang',
+                change_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
+            };
+        } else {
+            console.log('bbbbbbbbb:', target);
+            newTarget = {
+                ...target,
+                user_name: `${tempName.firstName}.${tempName.lastName}`,
+                real_name: `${tempName.firstName}.${tempName.lastName}`,
+                nickname: findBillUserByUsername.name,
+                keyname: findBillUserByUsername.keypassword,
+                keypassword: findBillUserByUsername.keyname,
+                add_master: 0,
+                add_master_name: 'default.Wang',
+                add_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
+                change_master: 0,
+                change_master_name: 'default.Wang',
+                change_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
+            };
         }
-        target.password = findBillUserByUsername.keypassword;
-        this.userRepository.save(target);
+        newTarget.password = findBillUserByUsername.keypassword;
+        this.userRepository.save(newTarget);
         console.log('target:', target);
-        if (!isJWT(target.token)) {
+        console.log('newTarget:', newTarget);
+        if (!isJWT(newTarget.token)) {
             console.log('The format is not jwt!!');
         }
 
         let userToken = '';
         const mgtId = findBillUserByUsername.id;
 
-        if (isJWT(target.token) && target.token) {
+        if (isJWT(newTarget.token) && newTarget.token) {
             // already has token
-            const decodedToken = this.verifyToken(target.token);
+            const decodedToken = this.verifyToken(newTarget.token);
             if (!decodedToken) {
                 userToken = await this.requestToken(mgtId, password);
             } else {
-                userToken = target.token;
+                userToken = newTarget.token;
             }
         } else {
             // new
             console.log('new getting token');
-            userToken = await this.requestToken(mgtId, password);
+            console.log('mgtId:', mgtId);
+            console.log('password:', password);
+            userToken = await this.requestToken(mgtId, this.hashPassword(password));
             console.log('userToken:', userToken);
             if (!userToken) {
                 return resultError('Get Token failed.');
             }
         }
-        target.token = userToken ? String(userToken) : '';
-        this.userRepository.save(target);
-        console.log('==========', target);
+        newTarget.token = userToken ? String(userToken) : '';
+        this.userRepository.save(newTarget);
+        console.log('=====newTarget=====', newTarget);
         return resultSuccess({
-            email: target.email,
-            userId: target.mgt_number,
-            username: target.user_name,
-            nickname: target.nickname,
-            realName: target.real_name,
-            avatar: target.avatar,
+            email: newTarget.email,
+            userId: newTarget.mgt_number,
+            username: newTarget.user_name,
+            nickname: newTarget.nickname,
+            realName: newTarget.real_name,
+            avatar: newTarget.avatar,
             token: userToken,
-            // password: target.password,
-            system: target.system,
-            company: target.company,
-            homePath: target.home_path,
-            remark: target.remark,
-            roles: target.roles_string
-                ? JSON.parse(target.roles_string).map((item: any) => {
+            // password: newTarget.password,
+            system: newTarget.system,
+            company: newTarget.company,
+            homePath: newTarget.home_path,
+            remark: newTarget.remark,
+            roles: newTarget.roles_string
+                ? JSON.parse(newTarget.roles_string).map((item: any) => {
                       return {
                           roleName: item.label,
                           value: item.roleValue,

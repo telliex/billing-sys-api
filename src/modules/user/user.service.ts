@@ -96,6 +96,7 @@ export class UserService {
 
     // inner
     async findUserById(userId: string) {
+        console.log('888888888888');
         const target: any = await this.userRepository.findOneBy({ id: userId });
         return target;
     }
