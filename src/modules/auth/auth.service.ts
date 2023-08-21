@@ -29,10 +29,7 @@ export class AuthService {
     ) {}
 
     async requestToken(mgtNumber: number, password: string): Promise<any> {
-        console.log('000000000', mgtNumber);
-        console.log('000000000', password);
         const user = await this.userService.findUserByMGTId(mgtNumber);
-        console.log('000000000', user);
         if (!user) {
             return null;
         }
@@ -154,7 +151,6 @@ export class AuthService {
         let newTarget = null;
         // To check if user available
         if (!target) {
-            console.log('aaaaaaa:', target);
             newTarget = {
                 mgt_number: findBillUserByUsername.id,
                 user_name: `${tempName.firstName}.${tempName.lastName}`,
@@ -162,6 +158,7 @@ export class AuthService {
                 nickname: findBillUserByUsername.name,
                 keyname: findBillUserByUsername.keypassword,
                 keypassword: findBillUserByUsername.keyname,
+                password: findBillUserByUsername.keypassword,
                 token: '',
                 remark: '',
                 roles: [],
@@ -180,7 +177,6 @@ export class AuthService {
                 change_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
             };
         } else {
-            console.log('bbbbbbbbb:', target);
             newTarget = {
                 ...target,
                 user_name: `${tempName.firstName}.${tempName.lastName}`,
@@ -188,6 +184,7 @@ export class AuthService {
                 nickname: findBillUserByUsername.name,
                 keyname: findBillUserByUsername.keypassword,
                 keypassword: findBillUserByUsername.keyname,
+                password: findBillUserByUsername.keypassword,
                 add_master: 0,
                 add_master_name: 'default.Wang',
                 add_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
@@ -197,7 +194,7 @@ export class AuthService {
             };
         }
         newTarget.password = findBillUserByUsername.keypassword;
-        this.userRepository.save(newTarget);
+        await this.userRepository.save(newTarget);
         console.log('target:', target);
         console.log('newTarget:', newTarget);
         if (!isJWT(newTarget.token)) {
@@ -227,10 +224,9 @@ export class AuthService {
             }
         }
         newTarget.token = userToken ? String(userToken) : '';
-        this.userRepository.save(newTarget);
+        await this.userRepository.save(newTarget);
         console.log('=====newTarget=====', newTarget);
         return resultSuccess({
-            email: newTarget.email,
             userId: newTarget.mgt_number,
             username: newTarget.user_name,
             nickname: newTarget.nickname,
