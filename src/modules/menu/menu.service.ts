@@ -223,7 +223,7 @@ export class MenuService {
             name: 'Home',
             component: 'LAYOUT',
             redirect: '/home/index',
-            isExt: 1,
+            isExt: 0,
             parentMenu: '',
             caseSensitive: true,
             meta: {
@@ -242,9 +242,11 @@ export class MenuService {
                     component: '/frontpage/index',
                     parentMenu: '323ef5b1-e92e-467d-bef2-fc8e86eb3a04',
                     meta: {
+                        currentActiveMenu: '/home',
                         hideMenu: true,
                         hideBreadcrumb: true,
-                        title: 'home',
+                        title: 'Home',
+                        icon: 'ri:home-4-line',
                     },
                 },
             ],

@@ -69,7 +69,6 @@ export class AuthService {
                 firstName: name.toLowerCase(),
             };
         }
-
         if (orgString.includes('.')) {
             const nameArray = orgString.split('.');
             return {
@@ -103,7 +102,8 @@ export class AuthService {
     }
 
     validatePassword(password: string, hash: string): boolean {
-        return this.hashPassword(password) === hash;
+        // return this.hashPassword(password) === hash;
+        return password === hash;
     }
 
     async logout(headers: HeaderParamDto) {
@@ -162,8 +162,7 @@ export class AuthService {
                 token: '',
                 remark: '',
                 roles: [],
-                roles_string:
-                    '[{"label":"default","value":"ac7649bc-46a4-491c-b4d5-919f4f44e613","key":"ac7649bc-46a4-491c-b4d5-919f4f44e613","option":{"roleValue":"default","remark":"normal rule","menuPermission":"fe8a905b-7c3c-4fb1-9c84-e9ac1ef86bd4","orderNo":100,"status":1,"addMaster":144,"addMasterName":"gladys.ding","addTime":"2023-08-03T04:10:08.000Z","changeMaster":144,"changeMasterName":"gladys.ding","changeTime":"2023-08-03T04:10:08.000Z","label":"default","value":"ac7649bc-46a4-491c-b4d5-919f4f44e613"},"originLabel":"default"}]',
+                roles_string: '[]',
                 dept: `e5d64b67-f525-4b7e-af40-a019fb39c9ba`,
                 system: `CRS`,
                 company: `ECloudValley`,
@@ -208,7 +207,7 @@ export class AuthService {
             // already has token
             const decodedToken = this.verifyToken(newTarget.token);
             if (!decodedToken) {
-                userToken = await this.requestToken(mgtId, password);
+                userToken = await this.requestToken(mgtId, findBillUserByUsername.keypassword);
             } else {
                 userToken = newTarget.token;
             }
@@ -216,8 +215,9 @@ export class AuthService {
             // new
             console.log('new getting token');
             console.log('mgtId:', mgtId);
-            console.log('password:', password);
-            userToken = await this.requestToken(mgtId, this.hashPassword(password));
+            console.log('password:', findBillUserByUsername.keypassword);
+            // userToken = await this.requestToken(mgtId, this.hashPassword(password));
+            userToken = await this.requestToken(mgtId, findBillUserByUsername.keypassword);
             console.log('userToken:', userToken);
             if (!userToken) {
                 return resultError('Get Token failed.');

@@ -9,7 +9,7 @@ export const database = (): TypeOrmModuleOptions => ({
     // username: 'root',
     // password: 'tornado123',
     port: 3306,
-    database: 'ecloud_rick',
+    database: 'ecloud',
     retryAttempts: 10,
     retryDelay: 3000,
     // ...
