@@ -71,9 +71,15 @@ export class AuthService {
         }
         if (orgString.includes('.')) {
             const nameArray = orgString.split('.');
+            if (nameArray.length === 2) {
+                return {
+                    lastName: nameArray[1].toLowerCase(),
+                    firstName: nameArray[0].toLowerCase(),
+                };
+            }
             return {
-                lastName: nameArray[1].toLowerCase(),
-                firstName: nameArray[0].toLowerCase(),
+                lastName: '',
+                firstName: orgString.toLowerCase(),
             };
         }
         return {
