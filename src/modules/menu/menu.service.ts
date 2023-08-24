@@ -105,20 +105,16 @@ export class MenuService {
         // const rolesKeyArray: string[] = rolesJSONArray.map(
         //     (item: { fieldKey: string; fieldValue: string }) => item.fieldKey,
         // );
-        // console.log('88888888=======:', rolesKeyArray);
-        const rolesAll = await this.roleRepository.find({
+        let rolesAll = await this.roleRepository.find({
             where: rolesJSONArray.map((item: any) => {
                 return { id: item.key, status: 1 };
             }),
         });
 
-        // const tempPlus: any[] = await this.menuRepository.find({
-        //     where: {
-        //         menu_name: query.menuName ? query.menuName : null,
-        //         alias: query.alias ? query.alias : null,
-        //         status: 1,
-        //     }
-        // });
+        // if user doesn't have any roles, return empty array
+        if (rolesJSONArray.length === 0) {
+            rolesAll = [];
+        }
 
         // merge all permissions
         let rolesAllPermissionsKeys: any[] = [];

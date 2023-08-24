@@ -146,6 +146,9 @@ export class AuthService {
         // get User info from bill_master
         const findBillUserByUsername = await this.findBillUserByUsername(username);
         console.log('findBillUserByUsername:', findBillUserByUsername);
+        if (!findBillUserByUsername) {
+            return resultError(`The username [${username}] does not exist!`);
+        }
         const checkPassword = this.validatePassword(password, findBillUserByUsername.keypassword);
         if (!checkPassword) {
             return resultError('UserName or password is wrong!');
