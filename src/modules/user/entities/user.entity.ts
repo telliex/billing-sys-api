@@ -92,6 +92,9 @@ export class User {
     @Column('datetime')
     add_time: string;
 
+    @Column({ type: 'datetime', nullable: true, default: null })
+    last_active_time: string;
+
     @Column({ comment: 'who changed', type: 'int', width: 11 })
     change_master: number;
 

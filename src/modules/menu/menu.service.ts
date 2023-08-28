@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNil } from 'lodash';
 import moment from 'moment';
@@ -44,6 +44,10 @@ export class MenuService {
 
     async findTreeListWithButton(headers: HeaderParamDto, query: any) {
         checkHeaders(headers);
+
+        const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
 
         const tempMenu: any[] = await this.menuRepository.find({
             where: {
@@ -99,8 +103,11 @@ export class MenuService {
         checkHeaders(headers);
         const user = Number(headers['user-id']);
 
-        // get target user roles's keys
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
+
         const rolesJSONArray = targetUser.roles_string ? JSON.parse(targetUser.roles_string) : [];
         // const rolesKeyArray: string[] = rolesJSONArray.map(
         //     (item: { fieldKey: string; fieldValue: string }) => item.fieldKey,
@@ -255,6 +262,11 @@ export class MenuService {
     async findAll(query: any, headers: HeaderParamDto): Promise<Menu[]> {
         checkHeaders(headers);
 
+        const user = Number(headers['user-id']);
+
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         let output: any[] = await this.menuRepository.find({
             where: {
                 menu_name: query.menuName ? Like(`%${query.menuName}%`) : null,
@@ -277,6 +289,12 @@ export class MenuService {
     async findOne(id: string, headers: HeaderParamDto): Promise<Menu | null> {
         checkHeaders(headers);
 
+        const user = Number(headers['user-id']);
+
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
+        // const user = Number(headers['user-id']);
         const targetMenu = await this.menuRepository.findOneBy({ id });
         if (isNil(targetMenu)) {
             throw new NotFoundException(`The menu #${id} is not found.`);
@@ -297,12 +315,16 @@ export class MenuService {
     ): Promise<CamelTypeMenuItem[]> {
         checkHeaders(headers);
 
+        const user = Number(headers['user-id']);
+
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         const newItem = Object.assign(
             this.menuRepository.create(),
             camelCaseToSnakeCase(createDto),
         );
 
-        const user = Number(headers['user-id']);
         const target = await this.userRepository.findOneBy({ mgt_number: user });
         // const number = Number(headers['time-zone'].split('UTC+')[1]);
         // const utcOffset =
@@ -331,9 +353,15 @@ export class MenuService {
         headers: HeaderParamDto,
     ): Promise<CamelTypeMenuItem[]> {
         checkHeaders(headers);
-        const targetItem = await this.menuRepository.findOneBy({ id });
 
         const user = Number(headers['user-id']);
+
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
+        const targetItem = await this.menuRepository.findOneBy({ id });
+
+        // const user = Number(headers['user-id']);
         // const number = Number(headers['time-zone'].split('UTC+')[1]);
         // const utcOffset =
         //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
@@ -359,6 +387,11 @@ export class MenuService {
 
     async remove(id: string, headers: HeaderParamDto): Promise<CamelTypeMenuItem[] | null> {
         checkHeaders(headers);
+        const user = Number(headers['user-id']);
+
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         const targetItem = await this.menuRepository.findOneBy({ id });
 
         if (!targetItem) {
@@ -425,5 +458,25 @@ export class MenuService {
                 this.processItems(item.children);
             }
         });
+    }
+
+    async checkAndRenewToken(user: number, limitTime: number) {
+        // get target user's last active time to compare with current time
+        // ===========
+        const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
+
+        const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(
+            moment(targetUser.last_active_time),
+            'minutes',
+        );
+
+        // If idle duration exceeds 3 hours, log the user out
+        if (idleDuration >= limitTime) {
+            throw new ForbiddenException('Token expired');
+            // Perform logout action, e.g., clear session
+        } else {
+            targetUser.last_active_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+            await this.userRepository.save(targetUser);
+        }
     }
 }

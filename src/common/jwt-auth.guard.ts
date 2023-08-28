@@ -4,6 +4,7 @@ import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/commo
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { isJWT } from 'class-validator';
+import moment from 'moment';
 import { Observable } from 'rxjs';
 
 import { jwtConstants } from './constants';
@@ -17,7 +18,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     verifyToken(token: string, jwtStr: any): boolean {
         try {
             // 解析 JWT Token，並驗證是否過期
-            this.jwtService.verify(token, jwtStr);
+            const payload = this.jwtService.verify(token, jwtStr);
+
+            const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(
+                moment(payload.last_active_time),
+                'minutes',
+            );
+            // If idle duration exceeds 3 hours, log the user out
+            if (idleDuration >= 3 * 60) {
+                return false;
+                // Perform logout action, e.g., clear session
+            }
+
             return true; // 驗證通過，JWT Token 過期
         } catch (error) {
             return false; // 驗證失敗，JWT Token 過期或無效
@@ -48,6 +60,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
             if (!decodedToken) {
                 return false;
             }
+            // package token again
             return true;
 
             // } catch (err) {

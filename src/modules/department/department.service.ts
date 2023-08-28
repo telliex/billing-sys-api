@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -30,11 +30,15 @@ export class DepartmentService {
 
     async create(createDto: DepartmentDto, headers: HeaderParamDto) {
         checkHeaders(headers);
+
+        const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
         const newItem = Object.assign(
             this.departmentRepository.create(),
             camelCaseToSnakeCase(createDto),
         );
-        const user = Number(headers['user-id']);
+
         const target = await this.userRepository.findOneBy({ mgt_number: user });
         newItem.id = undefined;
         newItem.add_master = user;
@@ -58,6 +62,11 @@ export class DepartmentService {
 
     async findAll(query: any, headers: HeaderParamDto) {
         checkHeaders(headers);
+
+        const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         const targetItems: any[] = await this.departmentRepository.find({
             where: {
                 dept_name: query.deptName ? Like(`%${query.deptName}%`) : null,
@@ -119,9 +128,13 @@ export class DepartmentService {
 
     async update(id: string, updateDto: DepartmentDto, headers: HeaderParamDto) {
         checkHeaders(headers);
-        const targetItem = await this.departmentRepository.findOneBy({ id });
 
         const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
+        const targetItem = await this.departmentRepository.findOneBy({ id });
+
         if (isNil(targetItem)) {
             throw new NotFoundException(`The dept #${id} is not found.`);
         }
@@ -145,6 +158,11 @@ export class DepartmentService {
 
     async remove(id: string, headers: HeaderParamDto) {
         checkHeaders(headers);
+
+        const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         const targetItem = await this.departmentRepository.findOneBy({ id });
 
         if (!targetItem) {
@@ -160,5 +178,25 @@ export class DepartmentService {
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
         return [output];
+    }
+
+    async checkAndRenewToken(user: number, limitTime: number) {
+        // get target user's last active time to compare with current time
+        // ===========
+        const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
+
+        const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(
+            moment(targetUser.last_active_time),
+            'minutes',
+        );
+
+        // If idle duration exceeds 3 hours, log the user out
+        if (idleDuration >= limitTime) {
+            throw new ForbiddenException('Token expired');
+            // Perform logout action, e.g., clear session
+        } else {
+            targetUser.last_active_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+            await this.userRepository.save(targetUser);
+        }
     }
 }

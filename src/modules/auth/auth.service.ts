@@ -35,7 +35,11 @@ export class AuthService {
         }
 
         // 密碼驗證成功，生成 JWT
-        const payload = { mgtNumber: user.mgt_number, sub: user.id };
+        const payload = {
+            mgtNumber: user.mgt_number,
+            sub: user.id,
+            last_active_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
+        };
         const accessToken = this.jwtService.sign(payload);
         // return { access_token: accessToken };'
         return accessToken;
@@ -127,7 +131,8 @@ export class AuthService {
         // }
 
         target.token = '';
-        this.userRepository.save(target);
+        target.last_active_time = null;
+        await this.userRepository.save(target);
         return resultSuccess(undefined, { msg: 'Token has been destroyed' });
     }
 
@@ -149,6 +154,7 @@ export class AuthService {
         if (!findBillUserByUsername) {
             return resultError(`The username [${username}] does not exist!`);
         }
+        // check password
         const checkPassword = this.validatePassword(password, findBillUserByUsername.keypassword);
         if (!checkPassword) {
             return resultError('UserName or password is wrong!');
@@ -177,6 +183,7 @@ export class AuthService {
                 company: `ECloudValley`,
                 avatar: '',
                 status: 1,
+                last_active_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
                 add_master: 0,
                 add_master_name: 'default.Wang',
                 add_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
@@ -193,6 +200,7 @@ export class AuthService {
                 keyname: findBillUserByUsername.keypassword,
                 keypassword: findBillUserByUsername.keyname,
                 password: findBillUserByUsername.keypassword,
+                last_active_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
                 add_master: 0,
                 add_master_name: 'default.Wang',
                 add_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
@@ -203,6 +211,7 @@ export class AuthService {
         }
         newTarget.password = findBillUserByUsername.keypassword;
         await this.userRepository.save(newTarget);
+
         console.log('target:', target);
         console.log('newTarget:', newTarget);
         if (!isJWT(newTarget.token)) {
@@ -214,6 +223,7 @@ export class AuthService {
 
         if (isJWT(newTarget.token) && newTarget.token) {
             // already has token
+            console.log('here already have token:', newTarget.token);
             const decodedToken = this.verifyToken(newTarget.token);
             if (!decodedToken) {
                 userToken = await this.requestToken(mgtId, findBillUserByUsername.keypassword);

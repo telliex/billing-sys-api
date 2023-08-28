@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -28,12 +28,16 @@ export class UserService {
 
     async create(createDto: UserDto, headers: HeaderParamDto) {
         checkHeaders(headers);
+
+        const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         const hashedPassword = await bcrypt.hash(createDto.password, 10);
         const newItem = Object.assign(
             this.userRepository.create(),
             camelCaseToSnakeCase(createDto),
         );
-        const user = Number(headers['user-id']);
         const target = await this.userRepository.findOneBy({ mgt_number: user });
         newItem.id = undefined;
         newItem.password = hashedPassword;
@@ -57,6 +61,11 @@ export class UserService {
 
     async findAll(query: any, headers: HeaderParamDto) {
         checkHeaders(headers);
+
+        const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         let output: any[] = await this.userRepository.find({
             where: {
                 user_name: query.userName ? Like(`%${query.userName}%`) : null,
@@ -79,6 +88,11 @@ export class UserService {
 
     async findOne(query: any, headers: HeaderParamDto) {
         checkHeaders(headers);
+
+        const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         const target: any = await this.userRepository.findOneBy({ id: query.id });
 
         const output: any = snakeCaseToCamelCase(target);
@@ -115,7 +129,11 @@ export class UserService {
         headers: HeaderParamDto,
     ) {
         checkHeaders(headers);
-        console.log('param:', param);
+
+        const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         let targetId = null;
         if (param.id) {
             targetId = await this.userRepository.findOneBy({ id: param.id });
@@ -138,9 +156,11 @@ export class UserService {
 
     async update(id: string, updateDto: UserDto, headers: HeaderParamDto) {
         checkHeaders(headers);
-        const targetItem = await this.userRepository.findOneBy({ id });
 
         const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+        const targetItem = await this.userRepository.findOneBy({ id });
 
         if (isNil(targetItem)) {
             throw new NotFoundException(`The user #${id} is not found.`);
@@ -166,6 +186,10 @@ export class UserService {
     async remove(id: string, headers: HeaderParamDto) {
         checkHeaders(headers);
 
+        const user = Number(headers['user-id']);
+        // renew login time
+        await this.checkAndRenewToken(user, 3 * 60);
+
         const targetItem = await this.userRepository.findOneBy({ id });
         if (!targetItem) {
             throw new NotFoundException(`The user #${id} is not found.`);
@@ -182,5 +206,25 @@ export class UserService {
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
         return [output];
+    }
+
+    async checkAndRenewToken(user: number, limitTime: number) {
+        // get target user's last active time to compare with current time
+        // ===========
+        const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
+
+        const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(
+            moment(targetUser.last_active_time),
+            'minutes',
+        );
+
+        // If idle duration exceeds 3 hours, log the user out
+        if (idleDuration >= limitTime) {
+            throw new ForbiddenException('Token expired');
+            // Perform logout action, e.g., clear session
+        } else {
+            targetUser.last_active_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+            await this.userRepository.save(targetUser);
+        }
     }
 }

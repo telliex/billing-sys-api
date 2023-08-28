@@ -48,6 +48,12 @@ export class UserDto {
     @Transform(({ value }) => value, { toPlainOnly: true })
     rolesString: string;
 
+    @IsString()
+    @IsNotEmpty({ message: 'last active time required' })
+    @Expose({ name: 'last_active_time' })
+    @Transform(({ value }) => value, { toPlainOnly: true })
+    lastActiveTime: string;
+
     @IsInt()
     @IsNotEmpty({ groups: ['update'], message: 'user required' })
     @Expose({ name: 'add_master' })

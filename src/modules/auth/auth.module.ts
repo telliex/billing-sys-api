@@ -20,7 +20,7 @@ import { BillMaster } from './entities/bill.master.entity';
         TypeOrmModule.forFeature([BillMaster]),
         JwtModule.register({
             secret: jwtConstants.secret,
-            signOptions: { expiresIn: '3h' }, // 設定 JWT 的過期時間
+            // signOptions: { expiresIn: '3h' }, // 設定 JWT 的過期時間
         }),
     ],
     controllers: [AuthController],

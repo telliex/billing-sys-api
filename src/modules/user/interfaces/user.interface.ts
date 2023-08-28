@@ -14,6 +14,7 @@ export interface SnakeTypeUserItem {
     system: string;
     company: string;
     status: number;
+    last_active_time: string;
     add_master: number;
     add_master_name: string;
     add_time: string;
@@ -38,6 +39,7 @@ export interface CamelTypeUserItem {
     system: string;
     company: string;
     status: number;
+    lastActiveTime: string;
     addMaster: number;
     addMasterName: string;
     addTime: string;
@@ -62,6 +64,7 @@ export interface User {
     readonly system: string;
     readonly company: string;
     readonly status: number;
+    readonly lastActiveTime: string;
     readonly addMaster: number;
     readonly addMasterName: string;
     readonly addTime: string;

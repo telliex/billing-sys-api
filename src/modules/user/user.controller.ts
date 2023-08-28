@@ -31,7 +31,6 @@ export class UserController {
     @Get()
     @UseGuards(JwtAuthGuard)
     findAll(@Headers() headers: HeaderParamDto, @Query() filterParam: FilterParamDto) {
-        console.log('888888888888');
         return this.userService.findAll(filterParam, headers);
     }
 
