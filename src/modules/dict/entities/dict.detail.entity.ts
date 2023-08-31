@@ -5,7 +5,7 @@ export class DictDetail {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ comment: 'dict name', type: 'varchar', length: 255, nullable: false })
+    @Column({ comment: 'dict id', type: 'varchar', length: 255, nullable: false })
     dict_id: string;
 
     @Column({ comment: 'dict item name', type: 'varchar', length: 255, nullable: false })
@@ -13,6 +13,9 @@ export class DictDetail {
 
     @Column({ comment: 'dict item value', type: 'varchar', length: 255, nullable: false })
     dict_item_value: string;
+
+    @Column({ comment: 'remark', type: 'varchar', length: 255, default: '', nullable: true })
+    remark: string;
 
     @Column({ comment: 'status', type: 'tinyint', width: 1, default: 0, nullable: false })
     status: number;

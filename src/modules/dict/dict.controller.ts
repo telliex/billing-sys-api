@@ -25,13 +25,13 @@ export class DictController {
         return this.dictService.findOne(dictName, headers);
     }
 
-    @Patch(':id')
+    @Patch(':dictName')
     update(
         @Headers() headers: HeaderParamDto,
-        @Param('id') id: string,
-        @Body() updateDictDto: CreateDictDto,
+        @Param('dictName') dictName: string,
+        @Body() createDictDto: CreateDictDto,
     ) {
-        return this.dictService.update(+id, updateDictDto);
+        return this.dictService.update(dictName, createDictDto, headers);
     }
 
     // @Delete(':id')

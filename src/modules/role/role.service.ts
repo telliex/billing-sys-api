@@ -4,6 +4,7 @@ import { isNil } from 'lodash';
 import moment from 'moment';
 import { Repository, Like } from 'typeorm';
 
+import { Dict } from '../dict/entities/dict.entity';
 import { HeaderParamDto } from '../restful/dto';
 
 import {
@@ -25,6 +26,8 @@ export class RoleService {
         private roleRepository: Repository<Role>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        @InjectRepository(Dict)
+        private dictRepository: Repository<Dict>,
     ) {}
 
     async create(createDto: RoleDto, headers: HeaderParamDto) {
@@ -118,6 +121,23 @@ export class RoleService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
+
+        const allRolesList: any[] = await this.roleRepository.find({
+            where: {
+                status: 1,
+            },
+        });
+        console.log('6666666allRolesList:', allRolesList);
+        const temp: string[] = [];
+        allRolesList.forEach((item) => {
+            temp.push(item.role_value);
+        });
+
+        const targetDict = await this.dictRepository.findOneBy({ dict_name: 'ROLE_LIST' });
+        targetDict.dict_value = temp.length !== 0 ? temp.join(',') : '';
+
+        await this.dictRepository.save(targetDict);
+
         return [output];
     }
 

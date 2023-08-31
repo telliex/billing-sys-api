@@ -11,6 +11,9 @@ export class Dict {
     @Column({ comment: 'dict value', type: 'varchar', length: 255, nullable: false })
     dict_value: string;
 
+    @Column({ comment: 'remark', type: 'varchar', length: 255, default: '', nullable: true })
+    remark: string;
+
     @Column({ comment: 'status', type: 'tinyint', width: 1, default: 0, nullable: false })
     status: number;
 
