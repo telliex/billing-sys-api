@@ -194,8 +194,8 @@ export class RoleService {
         }
         // transform to camelCase
         const output: CamelTypeRoleItem = snakeCaseToCamelCase(
-            // await this.roleRepository.remove(targetItem),
-            targetItem,
+            await this.roleRepository.remove(targetItem),
+            // targetItem,
         ) as CamelTypeRoleItem;
 
         output.changeTime = output.changeTime
@@ -231,8 +231,6 @@ export class RoleService {
                 status: 1,
             },
         });
-        console.log('88888888=======:', target);
-        console.log('99999999=======:', role);
 
         target.forEach((item) => {
             let isSave = false;
