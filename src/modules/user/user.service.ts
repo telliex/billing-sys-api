@@ -173,6 +173,11 @@ export class UserService {
         updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         updateItem.change_master_name = target.user_name;
 
+        // when update user info if status is not 1, set roles_string to empty array
+        if (updateItem.status !== 1) {
+            updateItem.roles_string = JSON.stringify([]);
+        }
+
         const output = snakeCaseToCamelCase(
             await this.userRepository.save(updateItem),
         ) as CamelTypeUserItem;

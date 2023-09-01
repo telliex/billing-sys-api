@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+    ConflictException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNil } from 'lodash';
 import moment from 'moment';
@@ -137,6 +142,7 @@ export class RoleService {
         targetDict.dict_value = temp.length !== 0 ? temp.join(',') : '';
 
         await this.dictRepository.save(targetDict);
+        await this.updateUserRoles(output);
 
         return [output];
     }
@@ -173,6 +179,11 @@ export class RoleService {
     async remove(id: string, headers: HeaderParamDto) {
         checkHeaders(headers);
 
+        // check the role if used
+        if (await this.checkRoleifUsed(id)) {
+            throw new ConflictException(`The role item has already sued.`);
+        }
+
         const user = Number(headers['user-id']);
         // renew login time
         await this.checkAndRenewToken(user, 3 * 60);
@@ -183,7 +194,8 @@ export class RoleService {
         }
         // transform to camelCase
         const output: CamelTypeRoleItem = snakeCaseToCamelCase(
-            await this.roleRepository.remove(targetItem),
+            // await this.roleRepository.remove(targetItem),
+            targetItem,
         ) as CamelTypeRoleItem;
 
         output.changeTime = output.changeTime
@@ -211,5 +223,55 @@ export class RoleService {
             targetUser.last_active_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
             await this.userRepository.save(targetUser);
         }
+    }
+
+    async updateUserRoles(role: any) {
+        const target: any[] = await this.userRepository.find({
+            where: {
+                status: 1,
+            },
+        });
+        console.log('88888888=======:', target);
+        console.log('99999999=======:', role);
+
+        target.forEach((item) => {
+            let isSave = false;
+            const userRoles = JSON.parse(item.roles_string);
+
+            userRoles.forEach((sunItem: any) => {
+                if (sunItem.key === role.id && sunItem.label !== role.roleValue) {
+                    sunItem.label = role.roleValue;
+                    sunItem.originLabel = role.roleValue;
+                    isSave = true;
+                }
+            });
+
+            if (isSave) {
+                item.roles_string = JSON.stringify(userRoles);
+                this.userRepository.save(item);
+            }
+        });
+    }
+
+    async checkRoleifUsed(roleId: string) {
+        const target: any[] = await this.userRepository.find({
+            where: {
+                status: 1,
+            },
+        });
+        let result = false;
+
+        target.forEach((item) => {
+            if (!result) {
+                const userRoles = JSON.parse(item.roles_string);
+                userRoles.forEach((sunItem: any) => {
+                    if (sunItem.key === roleId) {
+                        result = true;
+                    }
+                });
+            }
+        });
+
+        return result;
     }
 }
