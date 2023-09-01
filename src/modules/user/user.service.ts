@@ -55,7 +55,6 @@ export class UserService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        console.log('output:', output);
         return [output];
     }
 
@@ -140,8 +139,6 @@ export class UserService {
         }
 
         const targetUserName = await this.userRepository.findOneBy({ user_name: param.userName });
-        console.log('targetId:', targetId);
-        console.log('targetUserName:', targetUserName);
 
         if (!targetUserName) {
             return false;

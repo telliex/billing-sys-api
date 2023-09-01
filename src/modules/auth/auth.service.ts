@@ -150,7 +150,6 @@ export class AuthService {
 
         // get User info from bill_master
         const findBillUserByUsername = await this.findBillUserByUsername(username);
-        console.log('findBillUserByUsername:', findBillUserByUsername);
         if (!findBillUserByUsername) {
             return resultError(`The username [${username}] does not exist!`);
         }
@@ -212,8 +211,6 @@ export class AuthService {
         newTarget.password = findBillUserByUsername.keypassword;
         await this.userRepository.save(newTarget);
 
-        console.log('target:', target);
-        console.log('newTarget:', newTarget);
         if (!isJWT(newTarget.token)) {
             console.log('The format is not jwt!!');
         }
@@ -244,7 +241,6 @@ export class AuthService {
         }
         newTarget.token = userToken ? String(userToken) : '';
         await this.userRepository.save(newTarget);
-        console.log('=====newTarget=====', newTarget);
         return resultSuccess({
             userId: newTarget.mgt_number,
             username: newTarget.user_name,

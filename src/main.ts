@@ -5,7 +5,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { AppModule } from './app.module';
 
 function MiddleWareToAll(res: any, req: any, next: any) {
-    console.log('enter global middleware.....');
+    // console.log('enter global middleware.....');
     next();
 }
 

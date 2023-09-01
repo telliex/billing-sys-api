@@ -58,7 +58,6 @@ export class RoleController {
         @Param('id') id: string,
         @Body('status') status: number,
     ) {
-        console.log('status:', status);
         return this.roleService.setRoleStatus(id, status, headers);
     }
 

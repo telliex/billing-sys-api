@@ -160,7 +160,6 @@ export function CreateModule(
  * @param option
  */
 export function panic(option: PanicOption | string) {
-    console.log();
     if (typeof option === 'string') {
         console.log(chalk.red(`\n❌ ${option}`));
         process.exit(1);

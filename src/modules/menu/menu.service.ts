@@ -133,9 +133,6 @@ export class MenuService {
             }
         });
 
-        // console.log('rolesAll:', rolesAll);
-        // console.log('rolesAllPermissionsKeys===============:', rolesAllPermissionsKeys);
-
         let temp: any[] = await this.menuRepository.find({
             where: {
                 menu_name: query.menuName ? query.menuName : null,
@@ -171,7 +168,7 @@ export class MenuService {
                 }
             });
         });
-        console.log('xx==============', xx);
+        // console.log('xx==============', xx);
         const newTemp = xx
             // .filter((item) => rolesAllPermissionsKeys.includes(item.id))
             // .filter((item) => item.type !== 'button')

@@ -56,7 +56,6 @@ export class DepartmentService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        console.log('output:', output);
         return [output];
     }
 
@@ -152,7 +151,6 @@ export class DepartmentService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        console.log('=========dept output:', output);
         return [output];
     }
 

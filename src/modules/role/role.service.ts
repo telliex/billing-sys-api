@@ -62,7 +62,6 @@ export class RoleService {
             ? offsetUtCTime(output.changeTime, headers['time-zone'])
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
-        console.log('output:', output);
         return [output];
     }
 
@@ -132,7 +131,6 @@ export class RoleService {
                 status: 1,
             },
         });
-        console.log('6666666allRolesList:', allRolesList);
         const temp: string[] = [];
         allRolesList.forEach((item) => {
             temp.push(item.role_value);
@@ -160,7 +158,6 @@ export class RoleService {
         if (isNil(target)) {
             throw new NotFoundException(`The role #${id} is not found.`);
         }
-        console.log('target:', target);
 
         target.status = status;
         // target.change_master = user;
@@ -258,7 +255,6 @@ export class RoleService {
             },
         });
         let result = false;
-
         target.forEach((item) => {
             if (!result) {
                 const userRoles = JSON.parse(item.roles_string);
