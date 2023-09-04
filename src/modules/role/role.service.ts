@@ -137,9 +137,12 @@ export class RoleService {
         });
 
         const targetDict = await this.dictRepository.findOneBy({ dict_name: 'ROLE_LIST' });
-        targetDict.dict_value = temp.length !== 0 ? temp.join(',') : '';
 
-        await this.dictRepository.save(targetDict);
+        if (targetDict) {
+            targetDict.dict_value = temp.length !== 0 ? temp.join(',') : '';
+            await this.dictRepository.save(targetDict);
+        }
+
         await this.updateUserRoles(output);
 
         return [output];
@@ -231,6 +234,7 @@ export class RoleService {
 
         target.forEach((item) => {
             let isSave = false;
+
             const userRoles = JSON.parse(item.roles_string);
 
             userRoles.forEach((sunItem: any) => {
@@ -255,9 +259,11 @@ export class RoleService {
             },
         });
         let result = false;
+        console.log('========target:', target);
         target.forEach((item) => {
+            console.log('========item', item);
             if (!result) {
-                const userRoles = JSON.parse(item.roles_string);
+                const userRoles = item.roles_string ? JSON.parse(item.roles_string) : [];
                 userRoles.forEach((sunItem: any) => {
                     if (sunItem.key === roleId) {
                         result = true;
