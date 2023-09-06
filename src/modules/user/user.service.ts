@@ -214,9 +214,12 @@ export class UserService {
         // get target user's last active time to compare with current time
         // ===========
         const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
-
+        let compareTime = '2021-01-01 00:00:00';
+        if (targetUser) {
+            compareTime = targetUser.last_active_time;
+        }
         const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(
-            moment(targetUser.last_active_time),
+            moment(compareTime),
             'minutes',
         );
 
