@@ -10,9 +10,10 @@ import moment from 'moment';
 import { Repository } from 'typeorm';
 
 import { HeaderParamDto } from '../restful/dto';
-import { checkHeaders, resultError, resultSuccess } from '../restful/helpers';
+import { checkHeaders, resultError, resultSuccess, snakeCaseToCamelCase } from '../restful/helpers';
 import { User } from '../user/entities/user.entity';
 
+import { CamelTypeUserItem } from '../user/interfaces/user.interface';
 import { UserService } from '../user/user.service';
 
 import { BillMaster } from './entities/bill.master.entity';
@@ -43,6 +44,41 @@ export class AuthService {
         const accessToken = this.jwtService.sign(payload);
         // return { access_token: accessToken };'
         return accessToken;
+    }
+
+    async checkFinalTime(headers: HeaderParamDto): Promise<any> {
+        const user = Number(headers['user-id']);
+
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
+        if (!target) {
+            return null;
+        }
+        const output = snakeCaseToCamelCase(target) as CamelTypeUserItem;
+        // // no need to transform
+        // output.lastActiveTime = output.lastActiveTime
+        //     ? offsetUtCTime(output.lastActiveTime, headers['time-zone'])
+        //     : '';
+
+        return [output];
+    }
+
+    async writeFinalTime(headers: HeaderParamDto): Promise<any> {
+        const user = Number(headers['user-id']);
+
+        const target = await this.userRepository.findOneBy({ mgt_number: user });
+        if (!target) {
+            return null;
+        }
+        target.last_active_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+
+        const output = snakeCaseToCamelCase(
+            await this.userRepository.save(target),
+        ) as CamelTypeUserItem;
+        // no need to transform
+        // output.lastActiveTime = output.lastActiveTime
+        //     ? offsetUtCTime(output.lastActiveTime, headers['time-zone'])
+        //     : '';
+        return [output];
     }
 
     verifyToken(token: string): boolean {

@@ -14,6 +14,16 @@ export class AuthController {
         return this.authService.requestToken(param.mgtNumber, param.password);
     }
 
+    @Get('finalActiveTime')
+    checkFinalTime(@Headers() headers: HeaderParamDto) {
+        return this.authService.checkFinalTime(headers);
+    }
+
+    @Post('finalActiveTime')
+    writeFinalTime(@Headers() headers: HeaderParamDto) {
+        return this.authService.writeFinalTime(headers);
+    }
+
     @Get('logout')
     logout(@Headers() headers: HeaderParamDto) {
         return this.authService.logout(headers);
