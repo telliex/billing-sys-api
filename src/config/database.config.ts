@@ -21,6 +21,6 @@ export const database = (): TypeOrmModuleOptions => ({
     autoLoadEntities: true,
     // 可以在開發環境下同步entity的數據結構到數據庫
     // 日後會使用自定義的遷移命令來代替,以便在生產環境中使用,所以以後這個選項會永久false
-    synchronize: true,
+    synchronize: false,
     // synchronize: process.env.NODE_ENV !== 'production',
 });
