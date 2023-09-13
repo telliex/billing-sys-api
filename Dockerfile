@@ -25,7 +25,11 @@ ENV DB_USERNAME $A_DB_USERNAME
 ENV DB_TYPE $A_DB_TYPE
 
 
-CMD [ "pnpm", "start" ]
+# CMD [ "pnpm", "start" ]
+
+RUN chmod +x build_website.sh
+CMD ["./build_website.sh"]
+
 # # 基於 Ubuntu 映像構建 Docker 容器
 # FROM ubuntu:latest as build-stage
 
