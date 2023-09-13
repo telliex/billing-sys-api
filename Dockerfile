@@ -8,6 +8,23 @@ RUN npm install -g pnpm && pnpm install
 
 COPY . .
 
+ARG A_ENV
+ARG A_DB_DATABASE
+ARG A_DB_HOST
+ARG A_DB_PASSWORD
+ARG A_DB_USERNAME
+ARG A_DB_TYPE
+
+
+ENV ENV $A_ENV
+ENV REGION us-west-2
+ENV DB_DATABASE $A_DB_DATABASE
+ENV DB_HOST $A_DB_HOST
+ENV DB_PASSWORD $A_DB_PASSWORD
+ENV DB_USERNAME $A_DB_USERNAME
+ENV DB_TYPE $A_DB_TYPE
+
+
 CMD [ "pnpm", "start" ]
 # # 基於 Ubuntu 映像構建 Docker 容器
 # FROM ubuntu:latest as build-stage

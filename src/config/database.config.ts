@@ -1,15 +1,19 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 export const database = (): TypeOrmModuleOptions => ({
-    type: 'mysql',
-    host: 'billing-dev-db.c3zkaaiu8aye.us-west-2.rds.amazonaws.com',
-    username: 'telliex.chiu',
-    password: 'zA#L2xetEcMu!o3^',
+    type: process.env.DB_TYPE as any,
+    //host: 'billing-dev-db.c3zkaaiu8aye.us-west-2.rds.amazonaws.com',
+    host: process.env.DB_HOST,
+    // username: 'telliex.chiu',
+    // password: 'zA#L2xetEcMu!o3^',
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
     // host: '127.0.0.1',
     // username: 'root',
     // password: 'tornado123',
     port: 3306,
-    database: 'ecloud',
+    database: process.env.DB_DATABASE,
     retryAttempts: 10,
     retryDelay: 3000,
     // ...
