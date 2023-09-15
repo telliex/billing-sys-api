@@ -24,11 +24,12 @@ ENV DB_PASSWORD $A_DB_PASSWORD
 ENV DB_USERNAME $A_DB_USERNAME
 ENV DB_TYPE $A_DB_TYPE
 
+# RUN chmod +x build_api.sh
+# CMD ["build_api.sh", "dev"]
 
 # CMD [ "pnpm", "start" ]
+CMD ["node", "setup-env.js"]
 
-RUN chmod +x build_api.sh
-CMD ["build_api.sh"]
 
 # # 基於 Ubuntu 映像構建 Docker 容器
 # FROM ubuntu:latest as build-stage
