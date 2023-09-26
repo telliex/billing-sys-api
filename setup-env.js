@@ -18,16 +18,18 @@ const envVars = {
     DB_TYPE: process.env.DB_TYPE,
 };
 
-// 将环境变量写入 .env 文件
+const env = process.env.ENV ? process.env.ENV.toLowerCase() : 'dev';
+
+// 將環境變量寫入 .env 文件
 const envFileContent = Object.entries(envVars)
     .map(([key, value]) => `${key}=${value}`)
     .join('\n');
 
 fs.writeFileSync('.env', envFileContent);
 
-// 启动您的应用程序
+// 啓動應用程序
 
-const child = spawn('pnpm', ['start']);
+const child = spawn('pnpm', [`start:${env}`]);
 
 child.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);
