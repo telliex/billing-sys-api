@@ -192,7 +192,7 @@ export class AuthService {
         // check password
         const checkPassword = this.validatePassword(password, findBillUserByUsername.keypassword);
         if (!checkPassword) {
-            return resultError('UserName or password is wrong!');
+            return resultError('The username or password is wrong!');
         }
 
         // get User info
@@ -254,27 +254,27 @@ export class AuthService {
         let userToken = '';
         const mgtId = findBillUserByUsername.id;
 
-        if (isJWT(newTarget.token) && newTarget.token) {
-            // already has token
-            console.log('here already have token:', newTarget.token);
-            const decodedToken = this.verifyToken(newTarget.token);
-            if (!decodedToken) {
-                userToken = await this.requestToken(mgtId, findBillUserByUsername.keypassword);
-            } else {
-                userToken = newTarget.token;
-            }
-        } else {
-            // new
-            console.log('new getting token');
-            console.log('mgtId:', mgtId);
-            console.log('password:', findBillUserByUsername.keypassword);
-            // userToken = await this.requestToken(mgtId, this.hashPassword(password));
-            userToken = await this.requestToken(mgtId, findBillUserByUsername.keypassword);
-            console.log('userToken:', userToken);
-            if (!userToken) {
-                return resultError('Get Token failed.');
-            }
+        // if (isJWT(newTarget.token) && newTarget.token) {
+        //     // already has token
+        //     console.log('here already have token:', newTarget.token);
+        //     const decodedToken = this.verifyToken(newTarget.token);
+        //     if (!decodedToken) {
+        //         userToken = await this.requestToken(mgtId, findBillUserByUsername.keypassword);
+        //     } else {
+        //         userToken = newTarget.token;
+        //     }
+        // } else {
+        // new
+        console.log('new getting token');
+        console.log('mgtId:', mgtId);
+        console.log('password:', findBillUserByUsername.keypassword);
+        // userToken = await this.requestToken(mgtId, this.hashPassword(password));
+        userToken = await this.requestToken(mgtId, findBillUserByUsername.keypassword);
+        console.log('userToken:', userToken);
+        if (!userToken) {
+            return resultError('Get Token failed.');
         }
+        // }
         newTarget.token = userToken ? String(userToken) : '';
         await this.userRepository.save(newTarget);
         return resultSuccess({
