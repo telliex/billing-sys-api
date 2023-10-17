@@ -11,7 +11,7 @@ export interface SnakeTypeUserItem {
     roles: any[];
     rolesString: string;
     dept: string;
-    system: string;
+    platform: string;
     company: string;
     status: number;
     last_active_time: string;
@@ -36,7 +36,7 @@ export interface CamelTypeUserItem {
     roles: any[];
     rolesString: string;
     dept: string;
-    system: string;
+    platform: string;
     company: string;
     status: number;
     lastActiveTime: string;
@@ -61,7 +61,7 @@ export interface User {
     readonly roles: any[];
     readonly rolesString: string;
     readonly dept: string;
-    readonly system: string;
+    readonly platform: string;
     readonly company: string;
     readonly status: number;
     readonly lastActiveTime: string;

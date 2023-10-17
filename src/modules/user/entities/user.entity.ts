@@ -66,7 +66,7 @@ export class User {
     company: string;
 
     @Column({ comment: 'dept', type: 'varchar', width: 255, default: 'CRS', nullable: false })
-    system: string;
+    platform: string;
 
     @Column({
         comment: 'homePath',
