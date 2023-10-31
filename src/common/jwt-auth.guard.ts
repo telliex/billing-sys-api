@@ -3,25 +3,39 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
+import { InjectRepository } from '@nestjs/typeorm';
 import { isJWT } from 'class-validator';
 import moment from 'moment';
 import { Observable } from 'rxjs';
+
+import { Repository } from 'typeorm';
+
+import { User } from '../modules/user/entities/user.entity';
 
 import { jwtConstants } from './constants';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
-    constructor(@Inject(JwtService) private readonly jwtService: JwtService) {
+    constructor(
+        @Inject(JwtService) private readonly jwtService: JwtService,
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
+    ) {
         super();
     }
 
-    verifyToken(token: string, jwtStr: any): boolean {
+    async verifyToken(token: string, jwtStr: any) {
         try {
             // 解析 JWT Token，並驗證是否過期
             const payload = this.jwtService.verify(token, jwtStr);
-
+            // Get User id from JWT Payload
+            const targetUser = await this.userRepository.findOneBy({
+                mgt_number: payload.mgtNumber,
+            });
+            console.log('targetUser:', targetUser);
             const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(
-                moment(payload.last_active_time),
+                // moment(payload.last_active_time),
+                moment(targetUser.last_active_time),
                 'minutes',
             );
             // If idle duration exceeds 3 hours, log the user out
