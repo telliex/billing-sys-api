@@ -173,9 +173,11 @@ export class AuthService {
     }
 
     async findBillUserByUsername(username: string): Promise<BillMaster | undefined> {
+        const hide = 'n';
         return this.billMasterRepository
             .createQueryBuilder('BillMaster')
             .where('keyname = :username', { username })
+            .andWhere('hide = :hide', { hide }) // 添加 hide = 'n' 条件
             .getOne(); // 僅讀取，不會對 User 資料表進行寫入
     }
 
@@ -186,11 +188,15 @@ export class AuthService {
 
         // get User info from bill_master
         const findBillUserByUsername = await this.findBillUserByUsername(username);
+
+        console.log('findBillUserByUsername:', findBillUserByUsername);
         if (!findBillUserByUsername) {
+            console.log('No Data. The username or password is wrong!');
             return resultError(`The username [${username}] does not exist!`);
         }
         // check password
         const checkPassword = this.validatePassword(password, findBillUserByUsername.keypassword);
+        console.log('checkPassword:', checkPassword);
         if (!checkPassword) {
             return resultError('The username or password is wrong!');
         }
