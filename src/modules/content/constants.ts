@@ -24,7 +24,7 @@ export enum PostOrderType {
  * 文章排序类型
  */
 export enum MenuItemType {
-    CATALOG = 'catalog',
-    PAGE = 'page',
-    BUTTON = 'button',
+    CATALOG = 0,
+    PAGE = 1,
+    BUTTON = 2,
 }

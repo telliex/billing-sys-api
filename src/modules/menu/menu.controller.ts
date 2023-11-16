@@ -50,15 +50,15 @@ export class MenuController {
         return this.menuService.findAll(filterParam, headers);
     }
 
-    @Get('tree')
-    @UseGuards(JwtAuthGuard)
-    async findTreeListWithButton(
-        @Headers() headers: HeaderParamDto,
-        @Query() filterParam: FilterParamDto,
-    ) {
-        // const { limit, offset } = paginationQuery;
-        return this.menuService.findTreeListWithButton(headers, filterParam);
-    }
+    // @Get('tree')
+    // @UseGuards(JwtAuthGuard)
+    // async findTreeListWithButton(
+    //     @Headers() headers: HeaderParamDto,
+    //     @Query() filterParam: FilterParamDto,
+    // ) {
+    //     // const { limit, offset } = paginationQuery;
+    //     return this.menuService.findTreeListWithButton(headers, filterParam);
+    // }
 
     @Get('nav')
     @UseGuards(JwtAuthGuard)

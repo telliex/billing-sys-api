@@ -9,7 +9,7 @@ import { DatabaseModule } from './modules/database/database.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { DictModule } from './modules/dict/dict.module';
 import { MenuModule } from './modules/menu/menu.module';
-import { MenuButtonsModule } from './modules/menu-buttons/menu-buttons.module';
+// import { MenuButtonsModule } from './modules/menu-buttons/menu-buttons.module';
 import { RoleModule } from './modules/role/role.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -21,7 +21,7 @@ import { UserModule } from './modules/user/user.module';
         RoleModule,
         UserModule,
         DepartmentModule,
-        MenuButtonsModule,
+        // MenuButtonsModule,
         AuthModule,
         DictModule,
     ],

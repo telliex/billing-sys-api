@@ -5,7 +5,7 @@ import moment from 'moment';
 import { Repository, Like } from 'typeorm';
 
 import { PaginateOptions, QueryHook } from '../database/types';
-import { MenuButtons } from '../menu-buttons/entities/menu-buttons.entity';
+// import { MenuButtons } from '../menu-buttons/entities/menu-buttons.entity';
 import { HeaderParamDto } from '../restful/dto';
 
 import {
@@ -29,9 +29,7 @@ export class MenuService {
         @InjectRepository(User)
         private userRepository: Repository<User>,
         @InjectRepository(Role)
-        private roleRepository: Repository<Role>,
-        @InjectRepository(MenuButtons)
-        private buttonRepository: Repository<MenuButtons>,
+        private roleRepository: Repository<Role>, // @InjectRepository(MenuButtons) // private buttonRepository: Repository<MenuButtons>,
     ) {}
 
     async paginate(options: PaginateOptions, callback?: QueryHook<Menu>) {
@@ -42,61 +40,61 @@ export class MenuService {
         //
     }
 
-    async findTreeListWithButton(headers: HeaderParamDto, query: any) {
-        checkHeaders(headers);
+    // async findTreeListWithButton(headers: HeaderParamDto, query: any) {
+    //     checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
-        // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+    //     const user = Number(headers['user-id']);
+    //     // renew login time
+    //     await this.checkAndRenewToken(user, 3 * 60);
 
-        const tempMenu: any[] = await this.menuRepository.find({
-            where: {
-                status: query.status ? query.status : 1,
-            },
-            order: {
-                order_no: 'ASC',
-            },
-        });
+    //     const tempMenu: any[] = await this.menuRepository.find({
+    //         where: {
+    //             status: query.status ? query.status : 1,
+    //         },
+    //         order: {
+    //             sort_no: 'ASC',
+    //         },
+    //     });
 
-        const resultMenu = tempMenu
-            // .filter((item) => item.type !== 'button')
-            .map((item) => {
-                return {
-                    id: item.id,
-                    type: item.type,
-                    title: item.alias,
-                    parentMenu: item.parent_menu,
-                    children: [],
-                };
-            });
+    //     const resultMenu = tempMenu
+    //         // .filter((item) => item.type !== 'button')
+    //         .map((item) => {
+    //             return {
+    //                 id: item.id,
+    //                 type: item.type,
+    //                 title: item.alias,
+    //                 parentMenu: item.parent_menu,
+    //                 children: [],
+    //             };
+    //         });
 
-        // const catalogs = resultMenu.filter(
-        //     (item) => item.parentMenu === '' && item.type === 'catalog',
-        // );
-        // const pages = resultMenu.filter(
-        //     (item) =>
-        //         (item.parentMenu !== '' && item.type === 'catalog') ||
-        //         (item.parentMenu !== '' && item.type === 'page'),
-        // );
+    //     // const catalogs = resultMenu.filter(
+    //     //     (item) => item.parentMenu === '' && item.type === 'catalog',
+    //     // );
+    //     // const pages = resultMenu.filter(
+    //     //     (item) =>
+    //     //         (item.parentMenu !== '' && item.type === 'catalog') ||
+    //     //         (item.parentMenu !== '' && item.type === 'page'),
+    //     // );
 
-        const tempButton: any[] = await this.buttonRepository.find({
-            where: {
-                status: 1,
-            },
-        });
-        const resultButton = tempButton.map((item) => {
-            return {
-                id: item.id,
-                type: 'button',
-                title: item.button_name,
-                parentMenu: item.belong_menu,
-                permission: item.button_permission,
-            };
-        });
-        return [...resultMenu, ...resultButton];
+    //     const tempButton: any[] = await this.buttonRepository.find({
+    //         where: {
+    //             status: 1,
+    //         },
+    //     });
+    //     const resultButton = tempButton.map((item) => {
+    //         return {
+    //             id: item.id,
+    //             type: 'button',
+    //             title: item.button_name,
+    //             parentMenu: item.belong_menu,
+    //             permission: item.button_permission,
+    //         };
+    //     });
+    //     return [...resultMenu, ...resultButton];
 
-        // return [dashboardRoute, authRoute, levelRoute, sysRoute, linkRoute];
-    }
+    //     // return [dashboardRoute, authRoute, levelRoute, sysRoute, linkRoute];
+    // }
 
     // show the dynimic menu list
     async findDynimicMenuList(headers: HeaderParamDto, query: any): Promise<NavItem[]> {
@@ -136,11 +134,11 @@ export class MenuService {
         let temp: any[] = await this.menuRepository.find({
             where: {
                 menu_name: query.menuName ? query.menuName : null,
-                alias: query.alias ? query.alias : null,
+                // alias: query.alias ? query.alias : null,
                 status: 1,
             },
             order: {
-                order_no: 'ASC',
+                sort_no: 'ASC',
             },
         });
 
@@ -267,11 +265,11 @@ export class MenuService {
         let output: any[] = await this.menuRepository.find({
             where: {
                 menu_name: query.menuName ? Like(`%${query.menuName}%`) : null,
-                alias: query.alias ? query.alias : null,
+                // alias: query.alias ? query.alias : null,
                 status: query.status ? query.status : null,
             },
             order: {
-                order_no: 'ASC',
+                sort_no: 'ASC',
             },
         });
         output = output.map((item) => {
@@ -322,16 +320,16 @@ export class MenuService {
             camelCaseToSnakeCase(createDto),
         );
 
-        const target = await this.userRepository.findOneBy({ mgt_number: user });
+        // const target = await this.userRepository.findOneBy({ mgt_number: user });
         // const number = Number(headers['time-zone'].split('UTC+')[1]);
         // const utcOffset =
         //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
         newItem.id = undefined;
         newItem.add_master = user;
-        newItem.add_master_name = target.user_name;
+        // newItem.add_master_name = target.user_name;
         newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         newItem.change_master = user;
-        newItem.change_master_name = target.user_name;
+        // newItem.change_master_name = target.user_name;
         newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         const output: CamelTypeMenuItem = snakeCaseToCamelCase(
             await this.menuRepository.save(newItem),
@@ -368,9 +366,9 @@ export class MenuService {
 
         const updateItem = Object.assign(targetItem, camelCaseToSnakeCase(updateDto));
 
-        const target = await this.userRepository.findOneBy({ mgt_number: user });
+        // const target = await this.userRepository.findOneBy({ mgt_number: user });
         updateItem.change_master = user;
-        updateItem.change_master_name = target.user_name;
+        // updateItem.change_master_name = target.user_name;
         updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         const output = snakeCaseToCamelCase(
             await this.menuRepository.save(updateItem),

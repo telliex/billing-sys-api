@@ -1,6 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Transform, Expose } from 'class-transformer';
-import { IsNotEmpty, MaxLength, IsInt, IsString, Max, Min, IsOptional } from 'class-validator';
+import {
+    IsNotEmpty,
+    MaxLength,
+    IsDate,
+    IsInt,
+    IsString,
+    Max,
+    Min,
+    IsOptional,
+} from 'class-validator';
 
 // import { snakeCase } from 'lodash';
 
@@ -16,27 +25,27 @@ export class MenuDto {
     @IsNotEmpty({ groups: ['update'], message: 'id required' })
     id: string;
 
-    @IsString()
+    @IsInt()
     @IsNotEmpty({ message: 'type required' })
-    type: string;
+    type: number;
 
     @IsString()
     @MaxLength(255, {
         message: 'Menu name content max length is 255',
     })
-    @IsNotEmpty({ message: 'type required' })
+    @IsNotEmpty({ message: 'Menu Name required' })
     @Expose({ name: 'menu_name' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     menuName: string;
 
-    @IsString()
-    @MaxLength(255, {
-        message: 'Menu name content max length is 255',
-    })
-    @IsNotEmpty({ message: 'type required' })
-    @Expose({ name: 'alias' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    alias: string;
+    // @IsString()
+    // @MaxLength(255, {
+    //     message: 'Menu name content max length is 255',
+    // })
+    // @IsNotEmpty({ message: 'type required' })
+    // @Expose({ name: 'alias' })
+    // @Transform(({ value }) => value, { toPlainOnly: true })
+    // alias: string;
 
     @IsString()
     @MaxLength(255, {
@@ -45,9 +54,9 @@ export class MenuDto {
     description: string;
 
     @IsString()
-    @MaxLength(100, {
-        message: 'Permission string max length is 100',
-    })
+    // @MaxLength(100, {
+    //     message: 'Permission string max length is 100',
+    // })
     permission: string;
 
     @IsString()
@@ -59,6 +68,7 @@ export class MenuDto {
 
     @IsString()
     @MaxLength(100, {
+        // 255
         message: 'Component name max length is 100',
     })
     @IsNotEmpty({ message: 'Component name required' })
@@ -70,7 +80,7 @@ export class MenuDto {
     @MaxLength(500, {
         message: 'Rout path max length is 500',
     })
-    @IsNotEmpty({ message: 'rout path required' })
+    @IsNotEmpty({ message: 'route path required' })
     @Expose({ name: 'route_path' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     routePath: string;
@@ -79,9 +89,9 @@ export class MenuDto {
     @IsNotEmpty({ message: 'order No required' })
     @Min(0)
     @Max(10000)
-    @Expose({ name: 'order_no' })
+    @Expose({ name: 'sort_no' })
     @Transform(({ value }) => value, { toPlainOnly: true })
-    orderNo: number;
+    sortNo: number; // order_no
 
     @IsString()
     @MaxLength(50, {
@@ -99,62 +109,62 @@ export class MenuDto {
     @Transform(({ value }) => value, { toPlainOnly: true })
     isExt: number;
 
-    @IsInt()
-    @Expose({ name: 'is_cache' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    isCache: number;
+    // @IsInt()
+    // @Expose({ name: 'is_cache' })
+    // @Transform(({ value }) => value, { toPlainOnly: true })
+    // isCache: number;
 
-    @IsString()
-    @MaxLength(255, {
-        message: 'Route name content max length is 255',
-    })
-    @IsNotEmpty({ message: 'type required' })
-    @Expose({ name: 'cache_name' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    cacheName: string;
+    // @IsString()
+    // @MaxLength(255, {
+    //     message: 'Route name content max length is 255',
+    // })
+    // @IsNotEmpty({ message: 'type required' })
+    // @Expose({ name: 'cache_name' })
+    // @Transform(({ value }) => value, { toPlainOnly: true })
+    // cacheName: string;
+
+    // @IsInt()
+    // @Expose({ name: 'is_show' })
+    // @Transform(({ value }) => value, { toPlainOnly: true })
+    // isShow: number;
 
     @IsInt()
-    @Expose({ name: 'is_show' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    isShow: number;
-
-    @IsInt()
-    @IsNotEmpty({ message: 'user required' })
+    @IsNotEmpty({ message: 'Status required' })
     status: number;
 
-    @IsString()
-    @Expose({ name: 'menu_buttons' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    menuButtons: string;
+    // @IsString()
+    // @Expose({ name: 'menu_buttons' })
+    // @Transform(({ value }) => value, { toPlainOnly: true })
+    // menuButtons: string;
 
-    @IsInt()
-    @IsNotEmpty({ groups: ['update'], message: 'user required' })
+    @IsString()
+    @IsNotEmpty({ groups: ['update'], message: 'Add Master required' })
     @Expose({ name: 'add_master' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     addMaster: number;
 
-    @IsString()
-    @Expose({ name: 'add_master_name' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    addMasterName: string;
+    // @IsString()
+    // @Expose({ name: 'add_master_name' })
+    // @Transform(({ value }) => value, { toPlainOnly: true })
+    // addMasterName: string;
 
-    @IsString()
-    @IsNotEmpty({ groups: ['update'], message: 'add time required' })
+    @IsDate()
+    @IsNotEmpty({ groups: ['update'], message: 'Add time required' })
     @Expose({ name: 'add_time' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     addTime: string;
 
-    @IsInt()
+    @IsString()
     @Expose({ name: 'change_master' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     changeMaster: number;
 
-    @IsString()
-    @Expose({ name: 'change_master_name' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    changeMasterName: string;
+    // @IsString()
+    // @Expose({ name: 'change_master_name' })
+    // @Transform(({ value }) => value, { toPlainOnly: true })
+    // changeMasterName: string;
 
-    @IsString()
+    @IsDate()
     @Expose({ name: 'change_time' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     changeTime: string;
