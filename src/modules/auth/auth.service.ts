@@ -5,6 +5,7 @@ import { createHash } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as Sentry from '@sentry/node';
 import { isJWT } from 'class-validator';
 import moment from 'moment';
 import { Repository } from 'typeorm';
@@ -192,12 +193,14 @@ export class AuthService {
         console.log('findBillUserByUsername:', findBillUserByUsername);
         if (!findBillUserByUsername) {
             console.log('No Data. The username or password is wrong!');
+            Sentry.captureException('No Data. The username or password is wrong!');
             return resultError(`The username [${username}] does not exist!`);
         }
         // check password
         const checkPassword = this.validatePassword(password, findBillUserByUsername.keypassword);
         console.log('checkPassword:', checkPassword);
         if (!checkPassword) {
+            Sentry.captureException('The username or password is wrong!');
             return resultError('The username or password is wrong!');
         }
 
