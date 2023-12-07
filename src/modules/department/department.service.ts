@@ -39,14 +39,16 @@ export class DepartmentService {
             camelCaseToSnakeCase(createDto),
         );
 
-        const target = await this.userRepository.findOneBy({ mgt_number: user });
+        // TODO
+        // const target = await this.userRepository.findOneBy({ mgt_number: user });
         newItem.id = undefined;
-        newItem.add_master = user;
-        newItem.add_master_name = target.user_name;
-        newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        newItem.change_master = user;
-        newItem.change_master_name = target.user_name;
-        newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        // TODO
+        // newItem.add_master = user;
+        // newItem.add_master_name = target.user_name;
+        // newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        // newItem.change_master = user;
+        // newItem.change_master_name = target.user_name;
+        // newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
 
         const output: CamelTypeMenuItem = snakeCaseToCamelCase(
             await this.departmentRepository.save(newItem),
@@ -72,7 +74,7 @@ export class DepartmentService {
                 status: query.status ? query.status : null,
             },
             order: {
-                order_no: 'ASC',
+                sort_no: 'ASC',
                 dept_name: 'ASC',
             },
         });
@@ -81,7 +83,7 @@ export class DepartmentService {
             return {
                 id: item.id,
                 deptName: item.dept_name,
-                orderNo: item.order_no,
+                sortNo: item.sort_no,
                 remark: item.remark,
                 parentDept: item.parent_dept,
                 children: undefined,
@@ -139,11 +141,14 @@ export class DepartmentService {
         }
 
         const updateItem = Object.assign(targetItem, camelCaseToSnakeCase(updateDto));
-        const target = await this.userRepository.findOneBy({ mgt_number: user });
 
-        updateItem.change_master = user;
-        updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        updateItem.change_master_name = target.user_name;
+        // TODO
+        // const target = await this.userRepository.findOneBy({ mgt_number: user });
+
+        // TODO
+        // updateItem.change_master = user;
+        // updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        // updateItem.change_master_name = targeTODOt.user_name;
         const output = snakeCaseToCamelCase(
             await this.departmentRepository.save(updateItem),
         ) as CamelTypeMenuItem;

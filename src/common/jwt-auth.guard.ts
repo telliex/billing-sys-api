@@ -29,8 +29,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
             // 解析 JWT Token，並驗證是否過期
             const payload = this.jwtService.verify(token, jwtStr);
             // Get User id from JWT Payload
+            // TODO Change
             const targetUser = await this.userRepository.findOneBy({
-                mgt_number: payload.mgtNumber,
+                id: payload.id,
             });
             console.log('targetUser:', targetUser);
             const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(

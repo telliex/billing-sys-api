@@ -1,18 +1,22 @@
+import { Expose, Type } from 'class-transformer';
 import {
     Entity,
     Column,
     PrimaryGeneratedColumn,
-    // UpdateDateColumn,
-    // CreateDateColumn,
+    BaseEntity,
+    UpdateDateColumn,
+    CreateDateColumn,
 } from 'typeorm';
 
 import { MenuItemType } from '../../content/constants';
 
-@Entity({ name: 'bill_system_menu' })
-export class Menu {
+@Entity({ name: 'mars_system_menu' })
+export class Menu extends BaseEntity {
+    @Expose()
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
+    @Expose()
     @Column({
         comment: '0=>catalog, 1=>page, 2=>button',
         primary: false,
@@ -26,6 +30,7 @@ export class Menu {
     })
     type: MenuItemType;
 
+    @Expose({ name: 'menuName' })
     @Column({
         comment: '',
         primary: true,
@@ -44,7 +49,7 @@ export class Menu {
 
     // @Column({ comment: 'menu cache name', type: 'varchar', width: 255, nullable: false })
     // cache_name: string;
-
+    @Expose()
     @Column({
         comment: '',
         primary: false,
@@ -61,7 +66,7 @@ export class Menu {
     // FE
     // @Column({ comment: 'permission', type: 'varchar', width: 100, default: '', nullable: true })
     // permission: string;
-
+    @Expose()
     @Column({
         comment: '',
         primary: false,
@@ -75,6 +80,7 @@ export class Menu {
     })
     component: string;
 
+    @Expose({ name: 'componentName' })
     @Column({
         comment: '',
         primary: false,
@@ -88,6 +94,7 @@ export class Menu {
     })
     component_name: string;
 
+    @Expose({ name: 'routePath' })
     @Column({
         comment: '',
         primary: false,
@@ -101,6 +108,7 @@ export class Menu {
     })
     route_path: string;
 
+    @Expose({ name: 'sortNo' })
     @Column({
         comment: '',
         primary: false,
@@ -114,6 +122,7 @@ export class Menu {
     })
     sort_no: number; // order_no
 
+    @Expose()
     @Column({
         comment: '',
         primary: false,
@@ -127,6 +136,7 @@ export class Menu {
     })
     icon: string;
 
+    @Expose({ name: 'parentMenu' })
     @Column({
         comment: '',
         primary: false,
@@ -140,6 +150,7 @@ export class Menu {
     })
     parent_menu: string;
 
+    @Expose({ name: 'isExt' })
     @Column({
         comment: '',
         primary: false,
@@ -159,6 +170,7 @@ export class Menu {
     // @Column({ comment: 'show', type: 'tinyint', width: 1, default: 0, nullable: false })
     // is_show: number;
 
+    @Expose()
     @Column({
         comment: '',
         primary: false,
@@ -175,6 +187,7 @@ export class Menu {
     // @Column({ comment: 'menu button groups', type: 'varchar', nullable: true })
     // menu_buttons: string;
 
+    @Expose({ name: 'addMaster' })
     @Column({
         comment: '',
         primary: false,
@@ -186,12 +199,14 @@ export class Menu {
         nullable: false,
         default: null,
     })
-    add_master: number;
+    add_master: string;
 
     // @Column({ comment: 'who added by name', type: 'varchar', width: 255, nullable: false })
     // add_master_name: string;
 
-    @Column({
+    @Expose({ name: 'addTime' })
+    @Type(() => Date)
+    @CreateDateColumn({
         comment: '',
         primary: false,
         name: 'add_time',
@@ -202,8 +217,9 @@ export class Menu {
         nullable: false,
         default: null,
     })
-    add_time: string;
+    add_time: Date;
 
+    @Expose({ name: 'changeMaster' })
     @Column({
         comment: '',
         primary: false,
@@ -215,12 +231,14 @@ export class Menu {
         nullable: false,
         default: null,
     })
-    change_master: number;
+    change_master: string;
 
     // @Column({ comment: 'who changed by name', type: 'varchar', width: 255, nullable: false })
     // change_master_name: string;
 
-    @Column({
+    @Expose({ name: 'changeTime' })
+    @Type(() => Date)
+    @UpdateDateColumn({
         comment: '',
         primary: false,
         name: 'change_time',
@@ -231,7 +249,21 @@ export class Menu {
         nullable: false,
         default: null,
     })
-    change_time: string;
+    change_time: Date;
+
+    @Expose()
+    @Column({
+        comment: '',
+        primary: false,
+        name: 'hide',
+        type: 'tinyint',
+        // length: 1,
+        width: 1,
+        unique: false,
+        nullable: false,
+        default: 0,
+    })
+    hide: number;
 }
 
 // export class MenuDto extends OmitType(Menu, [] as const) {}

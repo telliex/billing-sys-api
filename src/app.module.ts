@@ -2,6 +2,7 @@ import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/c
 
 import { AppController } from './app.controller';
 import { database } from './config';
+import { GlobalSettingModule } from './config/setting.module';
 import { KeepaliveController } from './keepalive/keepalive.controller';
 import { InitMiddleware } from './middleware/init.middleware';
 import { AuthModule } from './modules/auth/auth.module';
@@ -24,6 +25,7 @@ import { UserModule } from './modules/user/user.module';
         // MenuButtonsModule,
         AuthModule,
         DictModule,
+        GlobalSettingModule,
     ],
     controllers: [AppController, KeepaliveController],
     providers: [],

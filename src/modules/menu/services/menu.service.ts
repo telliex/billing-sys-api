@@ -4,22 +4,22 @@ import { isNil } from 'lodash';
 import moment from 'moment';
 import { Repository, Like } from 'typeorm';
 
-import { PaginateOptions, QueryHook } from '../database/types';
+import { PaginateOptions, QueryHook } from '../../database/types';
 // import { MenuButtons } from '../menu-buttons/entities/menu-buttons.entity';
-import { HeaderParamDto } from '../restful/dto';
+import { HeaderParamDto } from '../../restful/dto';
 
 import {
     offsetUtCTime,
     camelCaseToSnakeCase,
     snakeCaseToCamelCase,
     checkHeaders,
-} from '../restful/helpers';
+} from '../../restful/helpers';
 
-import { Role } from '../role/entities/role.entity';
-import { User } from '../user/entities/user.entity';
+import { Role } from '../../role/entities/role.entity';
+import { User } from '../../user/entities/user.entity';
 
-import { Menu } from './entities/menu.entity';
-import { NavItem, CamelTypeMenuItem } from './interfaces/menu.interface';
+import { Menu } from '../entities/menu.entity';
+import { NavItem, CamelTypeMenuItem } from '../interfaces/menu.interface';
 
 @Injectable()
 export class MenuService {
@@ -122,13 +122,14 @@ export class MenuService {
         }
 
         // merge all permissions
-        let rolesAllPermissionsKeys: any[] = [];
+        const rolesAllPermissionsKeys: any[] = [];
         rolesAll.forEach((item) => {
-            if (item.menu_permission && item.menu_permission !== '') {
-                rolesAllPermissionsKeys = [
-                    ...new Set([...rolesAllPermissionsKeys, ...item.menu_permission.split(',')]),
-                ];
-            }
+            // TODO
+            // if (item.menu_permission && item.menu_permission !== '') {
+            //     rolesAllPermissionsKeys = [
+            //         ...new Set([...rolesAllPermissionsKeys, ...item.menu_permission.split(',')]),
+            //     ];
+            // }
         });
 
         let temp: any[] = await this.menuRepository.find({
@@ -325,12 +326,16 @@ export class MenuService {
         // const utcOffset =
         //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
         newItem.id = undefined;
-        newItem.add_master = user;
+        // TODO
+        // newItem.add_master = user;
         // newItem.add_master_name = target.user_name;
-        newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        newItem.change_master = user;
+        // TODO
+        // newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        // TODO
+        // newItem.change_master = user;
         // newItem.change_master_name = target.user_name;
-        newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        // TODO
+        // newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         const output: CamelTypeMenuItem = snakeCaseToCamelCase(
             await this.menuRepository.save(newItem),
         ) as unknown as CamelTypeMenuItem;
@@ -367,9 +372,11 @@ export class MenuService {
         const updateItem = Object.assign(targetItem, camelCaseToSnakeCase(updateDto));
 
         // const target = await this.userRepository.findOneBy({ mgt_number: user });
-        updateItem.change_master = user;
+        // TODO
+        // updateItem.change_master = user;
         // updateItem.change_master_name = target.user_name;
-        updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        // TODO
+        // updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
         const output = snakeCaseToCamelCase(
             await this.menuRepository.save(updateItem),
         ) as CamelTypeMenuItem;

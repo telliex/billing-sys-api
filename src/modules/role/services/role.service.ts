@@ -9,20 +9,20 @@ import { isNil } from 'lodash';
 import moment from 'moment';
 import { Repository, Like } from 'typeorm';
 
-import { Dict } from '../dict/entities/dict.entity';
-import { HeaderParamDto } from '../restful/dto';
+import { Dict } from '../../dict/entities/dict.entity';
+import { HeaderParamDto } from '../../restful/dto';
 
 import {
     checkHeaders,
     offsetUtCTime,
     snakeCaseToCamelCase,
     camelCaseToSnakeCase,
-} from '../restful/helpers';
-import { User } from '../user/entities/user.entity';
+} from '../../restful/helpers';
+import { User } from '../../user/entities/user.entity';
 
-import { RoleDto } from './dto/role.dto';
-import { Role } from './entities/role.entity';
-import { CamelTypeRoleItem } from './interfaces/role.interface';
+import { RoleDto } from '../dto/role.dto';
+import { Role } from '../entities/role.entity';
+import { CamelTypeRoleItem } from '../interfaces/role.interface';
 
 @Injectable()
 export class RoleService {
@@ -46,14 +46,19 @@ export class RoleService {
             this.roleRepository.create(),
             camelCaseToSnakeCase(createDto),
         );
-        const target = await this.userRepository.findOneBy({ mgt_number: user });
+        // TODO
+        // const target = await this.userRepository.findOneBy({ mgt_number: user });
+
         newItem.id = undefined;
-        newItem.add_master = user;
-        newItem.add_master_name = target.user_name;
-        newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        newItem.change_master = user;
-        newItem.change_master_name = target.user_name;
-        newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+
+        // TODO
+        // newItem.add_master = user;
+        // newItem.add_master_name = target.user_name;
+        // newItem.add_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        // newItem.change_master = user;
+        // newItem.change_master_name = target.user_name;
+        // newItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+
         const output: CamelTypeRoleItem = snakeCaseToCamelCase(
             await this.roleRepository.save(newItem),
         ) as unknown as CamelTypeRoleItem;
@@ -78,7 +83,7 @@ export class RoleService {
                 status: query.status ? query.status : null,
             },
             order: {
-                order_no: 'ASC',
+                sort_no: 'ASC',
                 role_name: 'ASC',
             },
         });
@@ -113,11 +118,14 @@ export class RoleService {
         }
 
         const updateItem = Object.assign(targetItem, camelCaseToSnakeCase(updateDto));
-        const target = await this.userRepository.findOneBy({ mgt_number: user });
+        // TODO
+        // const target = await this.userRepository.findOneBy({ mgt_number: user });
 
-        updateItem.change_master = user;
-        updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        updateItem.change_master_name = target.user_name;
+        // TODO
+        // updateItem.change_master = user;
+        // updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        // updateItem.change_master_name = target.user_name;
+
         const output = snakeCaseToCamelCase(
             await this.roleRepository.save(updateItem),
         ) as CamelTypeRoleItem;
@@ -164,7 +172,8 @@ export class RoleService {
 
         target.status = status;
         // target.change_master = user;
-        target.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        // TODO
+        // target.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
 
         const output = snakeCaseToCamelCase(
             await this.roleRepository.save(target),

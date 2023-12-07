@@ -6,9 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from '../role/entities/role.entity';
 import { User } from '../user/entities/user.entity';
 
+import { MenuController } from './controllers/menu.controller';
 import { Menu } from './entities/menu.entity';
-import { MenuController } from './menu.controller';
-import { MenuService } from './menu.service';
+import { MenuService } from './services/menu.service';
 
 @Module({
     imports: [

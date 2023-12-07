@@ -13,11 +13,11 @@ import {
 
 import { JwtAuthGuard } from '@/common/jwt-auth.guard';
 
-import { HeaderParamDto } from '../restful/dto';
+import { HeaderParamDto } from '../../restful/dto';
 
-import { RoleDto, FilterParamDto } from './dto';
+import { RoleDto, FilterParamDto } from '../dto';
 
-import { RoleService } from './role.service';
+import { RoleService } from '../services/role.service';
 
 @Controller('api/v1.0/system/role')
 export class RoleController {

@@ -14,7 +14,7 @@ import { checkHeaders, resultError, resultSuccess, snakeCaseToCamelCase } from '
 import { User } from '../user/entities/user.entity';
 
 import { CamelTypeUserItem } from '../user/interfaces/user.interface';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/services/user.service';
 
 import { BillMaster } from './entities/bill.master.entity';
 
@@ -24,21 +24,19 @@ export class AuthService {
         private userService: UserService,
         private readonly jwtService: JwtService,
         @InjectRepository(User)
-        private userRepository: Repository<User>,
-        @InjectRepository(BillMaster)
-        private readonly billMasterRepository: Repository<BillMaster>,
+        private userRepository: Repository<User>, // @InjectRepository(BillMaster) // private readonly billMasterRepository: Repository<BillMaster>,
     ) {}
 
-    async requestToken(mgtNumber: number, password: string): Promise<any> {
-        const user = await this.userService.findUserByMGTId(mgtNumber);
+    async requestToken(userId: string, password: string): Promise<any> {
+        const user = await this.userService.findUserById(userId);
         if (!user) {
             return null;
         }
 
         // 密碼驗證成功，生成 JWT
         const payload = {
-            mgtNumber: user.mgt_number,
-            sub: user.id,
+            userId: user.id,
+            email: user.email,
             last_active_time: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
         };
         const accessToken = this.jwtService.sign(payload);
@@ -177,6 +175,15 @@ export class AuthService {
         return this.billMasterRepository
             .createQueryBuilder('BillMaster')
             .where('keyname = :username', { username })
+            .andWhere('hide = :hide', { hide }) // 添加 hide = 'n' 条件
+            .getOne(); // 僅讀取，不會對 User 資料表進行寫入
+    }
+
+    async findBillUserById(userId: string): Promise<User | undefined> {
+        const hide = 'n';
+        return this.userRepository
+            .createQueryBuilder('User')
+            .where('id = :userId', { userId })
             .andWhere('hide = :hide', { hide }) // 添加 hide = 'n' 条件
             .getOne(); // 僅讀取，不會對 User 資料表進行寫入
     }

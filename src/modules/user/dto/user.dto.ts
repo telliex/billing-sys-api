@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Transform, Expose } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsDate, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 @Injectable()
 export class UserDto {
@@ -9,14 +9,9 @@ export class UserDto {
     id: string;
 
     @IsNotEmpty({ message: 'user name required' })
-    @Expose({ name: 'user_name' })
+    @Expose({ name: 'display_name' })
     @Transform(({ value }) => value, { toPlainOnly: true })
-    userName: string;
-
-    @IsNotEmpty({ message: 'real name required' })
-    @Expose({ name: 'real_name' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    realName: string;
+    displayName: string;
 
     @IsString()
     @MaxLength(255, {
@@ -25,66 +20,47 @@ export class UserDto {
     avatar: string;
 
     @IsString()
+    @IsNotEmpty({ message: 'password required' })
     @MaxLength(255, {
-        message: 'desc max length is 255',
+        message: 'password max length is 255',
     })
-    desc: string;
-
-    // set checkPassword(value: string)
-    @IsString()
-    @IsNotEmpty({ message: 'password  required' })
     password: string;
 
     @IsString()
-    token: string;
-
-    @IsString()
-    @Expose({ name: 'home_path' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    homePath: string;
-
-    @IsString()
-    @Expose({ name: 'roles_string' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    rolesString: string;
-
-    @IsString()
-    @IsNotEmpty({ message: 'last active time required' })
-    @Expose({ name: 'last_active_time' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    lastActiveTime: string;
+    @MaxLength(255, {
+        message: 'remark max length is 255',
+    })
+    remark: string;
 
     @IsInt()
-    @IsNotEmpty({ groups: ['update'], message: 'user required' })
-    @Expose({ name: 'add_master' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    addMaster: number;
+    hide: number;
 
     @IsString()
-    @Expose({ name: 'add_master_name' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    addMasterName: string;
+    sex: string;
+
+    @IsDate()
+    birthday: Date;
 
     @IsString()
-    @IsNotEmpty({ groups: ['update'], message: 'add time required' })
-    @Expose({ name: 'add_time' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    addTime: string;
-
-    @IsInt()
-    @Expose({ name: 'change_master' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    changeMaster: number;
+    tel: string;
 
     @IsString()
-    @Expose({ name: 'change_master_name' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    changeMasterName: string;
+    mobile: string;
 
     @IsString()
-    @Expose({ name: 'change_time' })
+    @IsNotEmpty({ message: 'email required' })
+    email: string;
+
+    @IsString()
+    address: string;
+
+    @IsString()
+    country: string;
+
+    @IsDate()
+    @Expose({ name: 'password_time' })
     @Transform(({ value }) => value, { toPlainOnly: true })
-    changeTime: string;
+    passwordTime: Date;
 }
 
 export class FilterParamDto {

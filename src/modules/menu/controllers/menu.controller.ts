@@ -13,11 +13,11 @@ import {
 
 import { JwtAuthGuard } from '@/common/jwt-auth.guard';
 
-import { HeaderParamDto } from '../restful/dto';
+import { HeaderParamDto } from '../../restful/dto';
 
-import { MenuDto, FilterParamDto } from './dto';
-import { NavItem } from './interfaces/menu.interface';
-import { MenuService } from './menu.service';
+import { MenuDto, FilterParamDto } from '../dto';
+import { NavItem } from '../interfaces/menu.interface';
+import { MenuService } from '../services/menu.service';
 
 @Controller('api/v1.0/system/menu')
 export class MenuController {

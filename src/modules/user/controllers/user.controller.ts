@@ -13,10 +13,10 @@ import {
 
 import { JwtAuthGuard } from '@/common/jwt-auth.guard';
 
-import { HeaderParamDto } from '../restful/dto';
+import { HeaderParamDto } from '../../restful/dto';
 
-import { UserDto, FilterParamDto } from './dto';
-import { UserService } from './user.service';
+import { UserDto, FilterParamDto } from '../dto';
+import { UserService } from '../services/user.service';
 
 @Controller('api/v1.0/system/user')
 export class UserController {
@@ -69,7 +69,7 @@ export class UserController {
         return this.userService.remove(id, headers);
     }
 
-    findUserByMGTId(@Headers() headers: HeaderParamDto, @Query('mgtNumber') mgtNumber: number) {
-        return this.userService.findUserByMGTId(mgtNumber);
-    }
+    // findUserByMGTId(@Headers() headers: HeaderParamDto, @Query('mgtNumber') mgtNumber: number) {
+    //     return this.userService.findUserByMGTId(mgtNumber);
+    // }
 }
