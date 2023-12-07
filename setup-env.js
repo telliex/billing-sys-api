@@ -1,6 +1,20 @@
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const fs = require('fs');
 
+// 替換為您腳本的實際路徑
+const scriptPath = './start-app.sh';
+
+exec(scriptPath, (error, stdout, stderr) => {
+    if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+    }
+
+    console.log(`stdout: ${stdout}`);
+    if (stderr) {
+        console.log(`stderr: ${stderr}`);
+    }
+});
 // DB_PASSWORD='zA#L2xetEcMu!o3^'
 // DB_HOST=billing-dev-db.c3zkaaiu8aye.us-west-2.rds.amazonaws.com
 // DB_DATABASE=ecloud
