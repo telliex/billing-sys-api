@@ -2,7 +2,7 @@ const { spawn, exec } = require('child_process');
 const fs = require('fs');
 
 // 替換為您腳本的實際路徑
-const scriptPath = './start-app.sh';
+const scriptPath = '/app/start-app.sh';
 
 exec(scriptPath, (error, stdout, stderr) => {
     if (error) {
@@ -15,11 +15,6 @@ exec(scriptPath, (error, stdout, stderr) => {
         console.log(`stderr: ${stderr}`);
     }
 });
-// DB_PASSWORD='zA#L2xetEcMu!o3^'
-// DB_HOST=billing-dev-db.c3zkaaiu8aye.us-west-2.rds.amazonaws.com
-// DB_DATABASE=ecloud
-// DB_USERNAME=telliex.chiu
-// DB_TYPE=mysql
 
 // 从环境变量中获取需要写入 .env 文件的值
 const envVars = {
@@ -42,7 +37,6 @@ const envFileContent = Object.entries(envVars)
 fs.writeFileSync('.env', envFileContent);
 
 // 啓動應用程序
-
 const child = spawn('pnpm', [`start:${env}`]);
 
 child.stdout.on('data', (data) => {

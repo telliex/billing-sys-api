@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ash
 
 # 獲取當前的日期和時間
 current_time=$(date "+%Y-%m-%d %H:%M:%S")

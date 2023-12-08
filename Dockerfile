@@ -2,12 +2,14 @@ FROM node:16-alpine
 
 WORKDIR /app
 
+# Copy package files and install dependencies
 COPY package*.json ./
-
 RUN npm install -g pnpm && pnpm install
 
+# Copy the application files
 COPY . .
 
+# Set the environment variables
 ARG A_ENV
 ARG A_DB_DATABASE
 ARG A_DB_HOST
@@ -24,7 +26,11 @@ ENV DB_PASSWORD $A_DB_PASSWORD
 ENV DB_USERNAME $A_DB_USERNAME
 ENV DB_TYPE $A_DB_TYPE
 
-# RUN chmod +x build_api.sh
+
+# Install required system tools
+RUN apk update && apk add --no-cache procps iproute2
+
+RUN chmod +x start-app.sh
 # CMD ["build_api.sh", "dev"]
 
 # CMD [ "pnpm", "start" ]
