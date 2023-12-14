@@ -1,13 +1,11 @@
-import {
-    ConflictException,
-    ForbiddenException,
-    Injectable,
-    NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNil } from 'lodash';
-import moment from 'moment';
 import { Repository, Like } from 'typeorm';
+
+import { SettingProvider } from '@/config/setting.provider';
+
+import { checkAndRenewToken } from '@/untils';
 
 import { Dict } from '../../dict/entities/dict.entity';
 import { HeaderParamDto } from '../../restful/dto';
@@ -33,14 +31,24 @@ export class RoleService {
         private userRepository: Repository<User>,
         @InjectRepository(Dict)
         private dictRepository: Repository<Dict>,
+        private readonly settingProvider: SettingProvider,
     ) {}
 
     async create(createDto: RoleDto, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const newItem = Object.assign(
             this.roleRepository.create(),
@@ -73,9 +81,18 @@ export class RoleService {
     async findAll(query: any, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         let output: any[] = await this.roleRepository.find({
             where: {
@@ -98,18 +115,36 @@ export class RoleService {
 
     async findOne(id: string, headers: HeaderParamDto) {
         checkHeaders(headers);
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
         return `This action returns a #${id} role`;
     }
 
     async update(id: string, updateDto: RoleDto, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const targetItem = await this.roleRepository.findOneBy({ id });
 
@@ -159,12 +194,21 @@ export class RoleService {
     async setRoleStatus(id: string, status: number, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const target = await this.roleRepository.findOneBy({ id });
-        // const user = Number(headers['user-id']);
+        // const user = String(headers['user-id']);
 
         if (isNil(target)) {
             throw new NotFoundException(`The role #${id} is not found.`);
@@ -193,9 +237,18 @@ export class RoleService {
             throw new ConflictException(`The role item has already sued.`);
         }
 
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const targetItem = await this.roleRepository.findOneBy({ id });
         if (!targetItem) {
@@ -212,29 +265,6 @@ export class RoleService {
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
         return [output];
-    }
-
-    async checkAndRenewToken(user: number, limitTime: number) {
-        // get target user's last active time to compare with current time
-        // ===========
-        const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
-        let compareTime = '2021-01-01 00:00:00';
-        if (targetUser) {
-            compareTime = targetUser.last_active_time;
-        }
-        const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(
-            moment(compareTime),
-            'minutes',
-        );
-
-        // If idle duration exceeds 3 hours, log the user out
-        if (idleDuration >= limitTime) {
-            throw new ForbiddenException('Token expired');
-            // Perform logout action, e.g., clear session
-        } else {
-            targetUser.last_active_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-            await this.userRepository.save(targetUser);
-        }
     }
 
     async updateUserRoles(role: any) {

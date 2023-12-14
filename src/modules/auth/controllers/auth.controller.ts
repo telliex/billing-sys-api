@@ -1,9 +1,9 @@
 import { Controller, Get, Headers, Query, Post, Body } from '@nestjs/common';
 
-import { HeaderParamDto } from '../restful/dto';
+import { HeaderParamDto } from '../../restful/dto';
 
-import { AuthService } from './auth.service';
-import { AuthParam } from './interfaces/auth.interface';
+import { AuthParam } from '../interfaces/auth.interface';
+import { AuthService } from '../services/auth.service';
 
 @Controller('api/v1.0/auth')
 export class AuthController {
@@ -11,7 +11,7 @@ export class AuthController {
 
     @Get()
     requestToken(@Headers() headers: HeaderParamDto, @Query() param: AuthParam) {
-        return this.authService.requestToken(param.mgtNumber, param.password);
+        return this.authService.requestToken(param.userId, param.password);
     }
 
     @Get('finalActiveTime')

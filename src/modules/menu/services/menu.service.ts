@@ -1,8 +1,10 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNil } from 'lodash';
-import moment from 'moment';
 import { Repository, Like } from 'typeorm';
+
+import { SettingProvider } from '@/config/setting.provider';
+import { checkAndRenewToken } from '@/untils';
 
 import { PaginateOptions, QueryHook } from '../../database/types';
 // import { MenuButtons } from '../menu-buttons/entities/menu-buttons.entity';
@@ -18,6 +20,7 @@ import {
 import { Role } from '../../role/entities/role.entity';
 import { User } from '../../user/entities/user.entity';
 
+import { UserRoleMapping } from '../../user/entities/user.role.mapping.entity';
 import { Menu } from '../entities/menu.entity';
 import { NavItem, CamelTypeMenuItem } from '../interfaces/menu.interface';
 
@@ -28,6 +31,10 @@ export class MenuService {
         private menuRepository: Repository<Menu>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        @InjectRepository(UserRoleMapping)
+        private userRoleMappingRepository: Repository<UserRoleMapping>,
+        private readonly settingProvider: SettingProvider,
+
         @InjectRepository(Role)
         private roleRepository: Repository<Role>, // @InjectRepository(MenuButtons) // private buttonRepository: Repository<MenuButtons>,
     ) {}
@@ -43,7 +50,7 @@ export class MenuService {
     // async findTreeListWithButton(headers: HeaderParamDto, query: any) {
     //     checkHeaders(headers);
 
-    //     const user = Number(headers['user-id']);
+    //     const user = String(headers['user-id']);
     //     // renew login time
     //     await this.checkAndRenewToken(user, 3 * 60);
 
@@ -99,94 +106,72 @@ export class MenuService {
     // show the dynimic menu list
     async findDynimicMenuList(headers: HeaderParamDto, query: any): Promise<NavItem[]> {
         checkHeaders(headers);
-        const user = Number(headers['user-id']);
+
+        const userId = String(headers['user-id']);
 
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
-
-        const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
-
-        const rolesJSONArray = targetUser.roles_string ? JSON.parse(targetUser.roles_string) : [];
-        // const rolesKeyArray: string[] = rolesJSONArray.map(
-        //     (item: { fieldKey: string; fieldValue: string }) => item.fieldKey,
-        // );
-        let rolesAll = await this.roleRepository.find({
-            where: rolesJSONArray.map((item: any) => {
-                return { id: item.key, status: 1 };
-            }),
-        });
-
-        // if user doesn't have any roles, return empty array
-        if (rolesJSONArray.length === 0) {
-            rolesAll = [];
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
         }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
-        // merge all permissions
-        const rolesAllPermissionsKeys: any[] = [];
-        rolesAll.forEach((item) => {
-            // TODO
-            // if (item.menu_permission && item.menu_permission !== '') {
-            //     rolesAllPermissionsKeys = [
-            //         ...new Set([...rolesAllPermissionsKeys, ...item.menu_permission.split(',')]),
-            //     ];
-            // }
-        });
-
-        let temp: any[] = await this.menuRepository.find({
+        const mappingTarget = await this.userRoleMappingRepository.find({
             where: {
-                menu_name: query.menuName ? query.menuName : null,
-                // alias: query.alias ? query.alias : null,
-                status: 1,
-            },
-            order: {
-                sort_no: 'ASC',
+                system_user_id: userId,
             },
         });
+        console.log('mappingTarget111111:', mappingTarget);
 
-        temp = temp.filter((item) => item.type !== 'button');
-        const map: any = {};
+        const rolesArray: string[] = [];
+        const rolesObject: any[] = [];
 
-        temp.forEach((item) => {
-            map[item.id] = item;
-        });
-        const xx: any[] = [];
-        const container: string[] = [];
-        rolesAllPermissionsKeys.forEach((item) => {
-            temp.forEach((subItem) => {
-                if (item === subItem.id && subItem.type !== 'button') {
-                    container.push(item);
-                    //  &&  !rolesAllPermissionsKeys.includes(subItem.parent_menu
-                    if (subItem.parent_menu !== '') {
-                        if (!container.includes(subItem.parent_menu)) {
-                            xx.push(map[subItem.parent_menu]);
-                        }
-                        xx.push(subItem);
-                    } else {
-                        xx.push(subItem);
-                    }
+        for (let i = 0; i < mappingTarget.length; i++) {
+            const result = await this.findRoleWithMenus(mappingTarget[i].system_role_id);
+            result[0].menus.forEach((subItem) => {
+                const tempId = subItem.menu.id;
+
+                if (!rolesArray.includes(tempId)) {
+                    console.log('66666:', tempId);
+                    rolesArray.push(tempId);
+                    rolesObject.push(subItem.menu);
                 }
             });
-        });
-        // console.log('xx==============', xx);
-        const newTemp = xx
+        }
+        console.log('rolesArray222222:', rolesArray);
+        const newTemp = rolesObject
             // .filter((item) => rolesAllPermissionsKeys.includes(item.id))
             // .filter((item) => item.type !== 'button')
             .map((item) => {
+                let typeString = 'button';
+                if (item.type === 0) {
+                    typeString = 'catalog';
+                } else if (item.type === 1) {
+                    typeString = 'page';
+                }
                 return {
                     id: item.id,
-                    type: item.type,
-                    path: item.route_path,
-                    title: item.alias,
-                    name: item.cache_name ? item.cache_name : item.alias,
-                    status: item.status,
+                    type: typeString,
+                    menuName: item.menu_name,
+                    // description: item.description,
                     component: item.component,
+                    path: item.route_path,
+                    title: item.menu_name,
+                    // title: item.alias,
+                    status: item.status,
                     isExt: item.is_ext,
                     redirect: null,
-                    parentMenu: item.parent_menu,
+                    parentMenu: item.parent_menu === null ? '' : item.parent_menu,
                     caseSensitive: true,
                     meta: {
                         hideMenu: item.status === 0,
-                        title: item.alias,
+                        // title: item.alias,
+                        title: item.menu_name,
                         hideChildrenInMenu: false,
                         icon: item.icon,
                         ignoreKeepAlive: item.is_cache !== 1,
@@ -194,9 +179,11 @@ export class MenuService {
                     children: [],
                 };
             });
+        console.log('newTemp8888888:', newTemp);
 
         const result = this.buildMenuNestedStructure(newTemp);
         // this.processItems(result);
+        console.log('result9999999:', result);
 
         // result.forEach((item) => {
         //     if (item.parentMenu === '' && item.type === 'catalog') {
@@ -258,10 +245,18 @@ export class MenuService {
     async findAll(query: any, headers: HeaderParamDto): Promise<Menu[]> {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
-
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         let output: any[] = await this.menuRepository.find({
             where: {
@@ -285,12 +280,20 @@ export class MenuService {
     async findOne(id: string, headers: HeaderParamDto): Promise<Menu | null> {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
-
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
-        // const user = Number(headers['user-id']);
+        // const user = String(headers['user-id']);
         const targetMenu = await this.menuRepository.findOneBy({ id });
         if (isNil(targetMenu)) {
             throw new NotFoundException(`The menu #${id} is not found.`);
@@ -311,10 +314,18 @@ export class MenuService {
     ): Promise<CamelTypeMenuItem[]> {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
-
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const newItem = Object.assign(
             this.menuRepository.create(),
@@ -354,14 +365,22 @@ export class MenuService {
     ): Promise<CamelTypeMenuItem[]> {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
-
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const targetItem = await this.menuRepository.findOneBy({ id });
 
-        // const user = Number(headers['user-id']);
+        // const user = String(headers['user-id']);
         // const number = Number(headers['time-zone'].split('UTC+')[1]);
         // const utcOffset =
         //   Math.floor(number / 10) === 0 ? `+0${number}:00` : `+${number}:00`;
@@ -389,10 +408,18 @@ export class MenuService {
 
     async remove(id: string, headers: HeaderParamDto): Promise<CamelTypeMenuItem[] | null> {
         checkHeaders(headers);
-        const user = Number(headers['user-id']);
-
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const targetItem = await this.menuRepository.findOneBy({ id });
 
@@ -462,26 +489,15 @@ export class MenuService {
         });
     }
 
-    async checkAndRenewToken(user: number, limitTime: number) {
-        // get target user's last active time to compare with current time
-        // ===========
-        const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
-        let compareTime = '2021-01-01 00:00:00';
-        if (targetUser) {
-            compareTime = targetUser.last_active_time;
-        }
-        const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(
-            moment(compareTime),
-            'minutes',
-        );
-
-        // If idle duration exceeds 3 hours, log the user out
-        if (idleDuration >= limitTime) {
-            throw new ForbiddenException('Token expired');
-            // Perform logout action, e.g., clear session
-        } else {
-            targetUser.last_active_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-            await this.userRepository.save(targetUser);
-        }
+    // merge table
+    async findRoleWithMenus(roleId: string) {
+        return this.roleRepository
+            .createQueryBuilder('role')
+            .leftJoinAndSelect('role.menus', 'menuRoleMapping')
+            .leftJoinAndSelect('menuRoleMapping.menu', 'menu')
+            .where('role.id = :roleId', { roleId })
+            .andWhere('role.hide = :hideStatus', { hideStatus: 1 })
+            .andWhere('menu.hide = :hideStatus', { hideStatus: 1 })
+            .getMany();
     }
 }

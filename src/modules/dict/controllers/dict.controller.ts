@@ -1,17 +1,16 @@
 import { Controller, Get, Param, Headers, Query, Patch, Body } from '@nestjs/common';
 
-import { HeaderParamDto } from '../restful/dto/api.dto';
+import { HeaderParamDto } from '../../restful/dto/api.dto';
 
-import { DictService } from './dict.service';
-import { CreateDictDto } from './dto';
-// import { CreateDictDto } from './dto/dict.dto';
+import { DictDto } from '../dto';
+import { DictService } from '../services/dict.service';
 
 @Controller('api/v1.0/system/dict')
 export class DictController {
     constructor(private readonly dictService: DictService) {}
 
     // @Post()
-    // create(@Body() createDictDto: CreateDictDto) {
+    // create(@Body() createDictDto: DictDto) {
     //     return this.dictService.create(createDictDto);
     // }
 
@@ -29,7 +28,7 @@ export class DictController {
     update(
         @Headers() headers: HeaderParamDto,
         @Param('dictName') dictName: string,
-        @Body() createDictDto: CreateDictDto,
+        @Body() createDictDto: DictDto,
     ) {
         return this.dictService.update(dictName, createDictDto, headers);
     }

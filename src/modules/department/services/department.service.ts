@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -6,18 +6,21 @@ import { isNil } from 'lodash';
 import moment from 'moment';
 import { Repository, Like } from 'typeorm';
 
-import { CamelTypeMenuItem } from '../menu/interfaces/menu.interface';
-import { HeaderParamDto } from '../restful/dto';
+import { SettingProvider } from '@/config/setting.provider';
+import { checkAndRenewToken } from '@/untils';
+
+import { CamelTypeMenuItem } from '../../menu/interfaces/menu.interface';
+import { HeaderParamDto } from '../../restful/dto';
 import {
     camelCaseToSnakeCase,
     checkHeaders,
     offsetUtCTime,
     snakeCaseToCamelCase,
-} from '../restful/helpers';
-import { User } from '../user/entities/user.entity';
+} from '../../restful/helpers';
+import { User } from '../../user/entities/user.entity';
 
-import { DepartmentDto } from './dto';
-import { Department } from './entities/department.entity';
+import { DepartmentDto } from '../dto';
+import { Department } from '../entities/department.entity';
 
 @Injectable()
 export class DepartmentService {
@@ -26,14 +29,25 @@ export class DepartmentService {
         private readonly departmentRepository: Repository<Department>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        private readonly settingProvider: SettingProvider,
     ) {}
 
     async create(createDto: DepartmentDto, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
+
         const newItem = Object.assign(
             this.departmentRepository.create(),
             camelCaseToSnakeCase(createDto),
@@ -64,9 +78,18 @@ export class DepartmentService {
     async findAll(query: any, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const targetItems: any[] = await this.departmentRepository.find({
             where: {
@@ -130,9 +153,18 @@ export class DepartmentService {
     async update(id: string, updateDto: DepartmentDto, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const targetItem = await this.departmentRepository.findOneBy({ id });
 
@@ -146,9 +178,8 @@ export class DepartmentService {
         // const target = await this.userRepository.findOneBy({ mgt_number: user });
 
         // TODO
-        // updateItem.change_master = user;
-        // updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        // updateItem.change_master_name = targeTODOt.user_name;
+        updateItem.change_master = userId;
+        updateItem.change_time = new Date(moment.utc().format('YYYY-MM-DD HH:mm:ss'));
         const output = snakeCaseToCamelCase(
             await this.departmentRepository.save(updateItem),
         ) as CamelTypeMenuItem;
@@ -162,9 +193,18 @@ export class DepartmentService {
     async remove(id: string, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const targetItem = await this.departmentRepository.findOneBy({ id });
 
@@ -181,28 +221,5 @@ export class DepartmentService {
             : '';
         output.addTime = output.addTime ? offsetUtCTime(output.addTime, headers['time-zone']) : '';
         return [output];
-    }
-
-    async checkAndRenewToken(user: number, limitTime: number) {
-        // get target user's last active time to compare with current time
-        // ===========
-        const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
-        let compareTime = '2021-01-01 00:00:00';
-        if (targetUser) {
-            compareTime = targetUser.last_active_time;
-        }
-        const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(
-            moment(compareTime),
-            'minutes',
-        );
-
-        // If idle duration exceeds 3 hours, log the user out
-        if (idleDuration >= limitTime) {
-            throw new ForbiddenException('Token expired');
-            // Perform logout action, e.g., clear session
-        } else {
-            targetUser.last_active_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-            await this.userRepository.save(targetUser);
-        }
     }
 }

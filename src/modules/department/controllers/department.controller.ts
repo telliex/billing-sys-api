@@ -13,10 +13,10 @@ import {
 
 import { JwtAuthGuard } from '@/common/jwt-auth.guard';
 
-import { HeaderParamDto } from '../restful/dto';
+import { HeaderParamDto } from '../../restful/dto';
 
-import { DepartmentService } from './department.service';
-import { DepartmentDto, FilterParamDto } from './dto';
+import { DepartmentDto, FilterParamDto } from '../dto';
+import { DepartmentService } from '../services/department.service';
 
 @Controller('api/v1.0/system/department')
 export class DepartmentController {

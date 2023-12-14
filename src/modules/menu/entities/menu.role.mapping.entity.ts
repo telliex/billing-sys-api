@@ -21,40 +21,42 @@ export class MenuRoleMapping extends BaseEntity {
     id: string;
 
     @Expose({ name: 'systemMenuId' })
-    @Column({
-        comment: '',
-        primary: false,
-        name: 'system_menu_id',
-        type: 'varchar',
-        // length: 1,
-        width: 36,
-        unique: true,
-        nullable: false,
-        default: null,
-    })
-    system_menu_id: string;
-
-    @Expose({ name: 'systemRoleId' })
-    @Column({
-        comment: '',
-        primary: true,
-        name: 'system_role_id',
-        type: 'varchar',
-        // length: 1,
-        width: 36,
-        unique: true,
-        nullable: false,
-        default: null,
-    })
-    system_role_id: string;
-
-    @ManyToOne(() => Menu)
+    @ManyToOne(() => Menu, (menu) => menu.roles)
     @JoinColumn({ name: 'system_menu_id' })
     menu: Menu;
 
-    @ManyToOne(() => Role)
+    @Expose({ name: 'systemRoleId' })
+    @ManyToOne(() => Role, (role) => role.menus)
     @JoinColumn({ name: 'system_role_id' })
     role: Role;
+
+    // @Expose({ name: 'systemMenuId' })
+    // @Column({
+    //     comment: '',
+    //     primary: false,
+    //     name: 'system_menu_id',
+    //     type: 'varchar',
+    //     // length: 1,
+    //     width: 36,
+    //     unique: false,
+    //     nullable: false,
+    //     default: null,
+    // })
+    // system_menu_id: string;
+
+    // @Expose({ name: 'systemRoleId' })
+    // @Column({
+    //     comment: '',
+    //     primary: false,
+    //     name: 'system_role_id',
+    //     type: 'varchar',
+    //     // length: 1,
+    //     width: 36,
+    //     unique: false,
+    //     nullable: false,
+    //     default: null,
+    // })
+    // system_role_id: string;
 
     @Expose({ name: 'addMaster' })
     @Column({
@@ -119,6 +121,12 @@ export class MenuRoleMapping extends BaseEntity {
         default: null,
     })
     change_time: Date;
-}
 
-// export class MenuDto extends OmitType(Menu, [] as const) {}
+    // @ManyToOne(() => Menu, (menu) => menu.roles)
+    // @JoinColumn({ name: 'system_menu_id' })
+    // menu: Menu;
+
+    // @ManyToOne(() => Role, (role) => role.menus)
+    // @JoinColumn({ name: 'system_role_id' })
+    // role: Role;
+}

@@ -5,7 +5,7 @@ import { IsNotEmpty, MaxLength, IsInt, IsString } from 'class-validator';
 // import { snakeCase } from 'lodash';
 
 @Injectable()
-export class CreateDictDto {
+export class DictDto {
     @IsString()
     @IsNotEmpty({ groups: ['update'], message: 'id required' })
     id: string;
@@ -39,25 +39,4 @@ export class CreateDictDto {
     @Expose({ name: 'add_master_name' })
     @Transform(({ value }) => value, { toPlainOnly: true })
     addMasterName: string;
-
-    @IsString()
-    @IsNotEmpty({ groups: ['update'], message: 'add time required' })
-    @Expose({ name: 'add_time' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    addTime: string;
-
-    @IsInt()
-    @Expose({ name: 'change_master' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    changeMaster: number;
-
-    @IsString()
-    @Expose({ name: 'change_master_name' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    changeMasterName: string;
-
-    @IsString()
-    @Expose({ name: 'change_time' })
-    @Transform(({ value }) => value, { toPlainOnly: true })
-    changeTime: string;
 }

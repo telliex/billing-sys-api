@@ -6,9 +6,12 @@ import {
     BaseEntity,
     UpdateDateColumn,
     CreateDateColumn,
+    OneToMany,
 } from 'typeorm';
 
 import { MenuItemType } from '../../content/constants';
+
+import { MenuRoleMapping } from './menu.role.mapping.entity';
 
 @Entity({ name: 'mars_system_menu' })
 export class Menu extends BaseEntity {
@@ -33,12 +36,12 @@ export class Menu extends BaseEntity {
     @Expose({ name: 'menuName' })
     @Column({
         comment: '',
-        primary: true,
+        primary: false,
         name: 'menu_name',
         type: 'varchar',
         // length: 1,
         width: 255,
-        unique: false,
+        unique: true,
         nullable: false,
         default: null,
     })
@@ -264,6 +267,9 @@ export class Menu extends BaseEntity {
         default: 0,
     })
     hide: number;
+
+    @OneToMany(() => MenuRoleMapping, (mapping) => mapping.menu)
+    roles: MenuRoleMapping[];
 }
 
 // export class MenuDto extends OmitType(Menu, [] as const) {}

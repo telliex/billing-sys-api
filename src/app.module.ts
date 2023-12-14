@@ -1,5 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 
+import { SettingProvider } from '@/config/setting.provider';
+
 import { AppController } from './app.controller';
 import { database } from './config';
 import { GlobalSettingModule } from './config/setting.module';
@@ -28,7 +30,7 @@ import { UserModule } from './modules/user/user.module';
         GlobalSettingModule,
     ],
     controllers: [AppController, KeepaliveController],
-    providers: [],
+    providers: [SettingProvider],
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {

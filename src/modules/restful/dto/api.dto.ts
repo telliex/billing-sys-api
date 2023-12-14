@@ -7,7 +7,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 export class HeaderParamDto {
     @IsString()
     @IsNotEmpty({ message: 'user id required' })
-    'user-id': number;
+    'user-id': string;
 
     @IsString()
     @IsNotEmpty({ message: 'time zone required' })

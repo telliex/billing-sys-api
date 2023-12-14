@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNil } from 'lodash';
@@ -6,19 +6,22 @@ import moment from 'moment';
 
 import { Repository } from 'typeorm';
 
-import { HeaderParamDto } from '../restful/dto';
+import { SettingProvider } from '@/config/setting.provider';
+import { checkAndRenewToken } from '@/untils';
+
+import { HeaderParamDto } from '../../restful/dto';
 import {
     camelCaseToSnakeCase,
     checkHeaders,
     offsetUtCTime,
     snakeCaseToCamelCase,
-} from '../restful/helpers';
-import { User } from '../user/entities/user.entity';
+} from '../../restful/helpers';
+import { User } from '../../user/entities/user.entity';
 
-import { CreateDictDto } from './dto';
-import { Dict } from './entities/dict.entity';
-import { CamelTypeDictItem } from './interfaces/dict.interface';
-// import { CreateDictDto } from './dto/dict.dto';
+import { DictDto } from '../dto';
+import { Dict } from '../entities/dict.entity';
+import { CamelTypeDictItem } from '../interfaces/dict.interface';
+// import { DictDto } from './dto/dict.dto';
 
 @Injectable()
 export class DictService {
@@ -29,23 +32,34 @@ export class DictService {
         // private dictDetailRepository: Repository<DictDetail>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        private readonly settingProvider: SettingProvider,
     ) {}
 
-    // create(createDictDto: CreateDictDto) {
+    // create(createDictDto: DictDto) {
     //     return 'This action adds a new dict';
     // }
 
     async findAll(query: any, headers: any) {
         checkHeaders(headers);
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
+
         return this.dictRepository.find();
     }
 
     async findOne(dictName: string, headers: any) {
         checkHeaders(headers);
-        // const user = Number(headers['user-id']);
+        // const user = String(headers['user-id']);
         // // renew login time
         // await this.checkAndRenewToken(user, 3 * 60);
         const targetDict = await this.dictRepository.findOneBy({ dict_name: dictName });
@@ -55,12 +69,21 @@ export class DictService {
         return targetDict;
     }
 
-    async update(dictName: string, createDictDto: CreateDictDto, headers: HeaderParamDto) {
+    async update(dictName: string, createDictDto: DictDto, headers: HeaderParamDto) {
         checkHeaders(headers);
 
-        const user = Number(headers['user-id']);
+        const userId = String(headers['user-id']);
         // renew login time
-        await this.checkAndRenewToken(user, 3 * 60);
+        const targetUser = await this.userRepository.findOneBy({ id: userId });
+        let writeTime = null;
+        if (targetUser) {
+            writeTime = checkAndRenewToken(
+                targetUser.last_active_time,
+                this.settingProvider.logoutTime,
+            );
+        }
+        targetUser.last_active_time = writeTime ? new Date(writeTime) : null;
+        await this.userRepository.save(targetUser);
 
         const targetItem = await this.dictRepository.findOneBy({ dict_name: dictName });
 
@@ -69,11 +92,9 @@ export class DictService {
         }
 
         const updateItem = Object.assign(targetItem, camelCaseToSnakeCase(createDictDto));
-        const target = await this.userRepository.findOneBy({ mgt_number: user });
 
-        updateItem.change_master = user;
-        updateItem.change_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        updateItem.change_master_name = target.user_name;
+        updateItem.change_master = userId;
+        updateItem.change_time = new Date(moment.utc().format('YYYY-MM-DD HH:mm:ss'));
         const output = snakeCaseToCamelCase(
             await this.dictRepository.save(updateItem),
         ) as CamelTypeDictItem;
@@ -87,27 +108,4 @@ export class DictService {
     // remove(id: number) {
     //     return `This action removes a #${id} dict`;
     // }
-
-    async checkAndRenewToken(user: number, limitTime: number) {
-        // get target user's last active time to compare with current time
-        // ===========
-        const targetUser = await this.userRepository.findOneBy({ mgt_number: user });
-        let compareTime = '2021-01-01 00:00:00';
-        if (targetUser) {
-            compareTime = targetUser.last_active_time;
-        }
-        const idleDuration = moment(moment.utc().format('YYYY-MM-DD HH:mm:ss')).diff(
-            moment(compareTime),
-            'minutes',
-        );
-
-        // If idle duration exceeds 3 hours, log the user out
-        if (idleDuration >= limitTime) {
-            throw new ForbiddenException('Token expired');
-            // Perform logout action, e.g., clear session
-        } else {
-            targetUser.last_active_time = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-            await this.userRepository.save(targetUser);
-        }
-    }
 }

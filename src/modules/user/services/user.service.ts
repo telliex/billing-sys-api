@@ -18,7 +18,7 @@ import {
     snakeCaseToCamelCase,
 } from '../../restful/helpers';
 
-import { UserDto } from '../dto';
+import { UserDto } from '../dto/user.dto';
 import { User } from '../entities/user.entity';
 import { CamelTypeUserItem } from '../interfaces/user.interface';
 

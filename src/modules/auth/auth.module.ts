@@ -4,27 +4,28 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { SettingProvider } from '@/config/setting.provider';
+
 import { jwtConstants } from '../../common/constants';
 import { JwtStrategy } from '../../common/jwt.strategy';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/services/user.service';
 
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { BillMaster } from './entities/bill.master.entity';
+import { AuthController } from './controllers/auth.controller';
+
+import { AuthService } from './services/auth.service';
 
 @Global() // 設置為 Global module
 @Module({
     imports: [
         TypeOrmModule.forFeature([User]),
-        TypeOrmModule.forFeature([BillMaster]),
         JwtModule.register({
             secret: jwtConstants.secret,
             // signOptions: { expiresIn: '3h' }, // 設定 JWT 的過期時間
         }),
     ],
     controllers: [AuthController],
-    providers: [AuthService, UserService, JwtStrategy],
+    providers: [AuthService, UserService, JwtStrategy, SettingProvider],
     exports: [JwtModule],
 })
 export class AuthModule {}

@@ -6,69 +6,47 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
     CreateDateColumn,
+    ManyToOne,
+    JoinColumn,
 } from 'typeorm';
 
-@Entity('bill_system_dict')
-export class Dict extends BaseEntity {
+import { Role } from '../../role/entities/role.entity';
+
+import { User } from './user.entity';
+
+@Entity('mars_system_user_role_mapping')
+export class UserRoleMapping extends BaseEntity {
     @Expose()
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Expose({ name: 'dictName' })
+    @Expose({ name: 'systemUserId' })
     @Column({
         comment: '',
         primary: false,
-        name: 'dict_name',
+        // name: 'system_user_id',
         type: 'varchar',
         // length: 1,
-        width: 255,
+        width: 36,
         unique: false,
         nullable: false,
         default: null,
     })
-    dict_name: string;
+    system_user_id: string;
 
-    @Expose({ name: 'dictValue' })
+    @Expose({ name: 'systemRoleId' })
     @Column({
         comment: '',
         primary: false,
-        name: 'dict_value',
+        // name: 'system_role_id',
         type: 'varchar',
         // length: 1,
-        width: 255,
+        width: 36,
         unique: false,
         nullable: false,
         default: null,
     })
-    dict_value: string;
-
-    @Expose({ name: 'remark' })
-    @Column({
-        comment: '',
-        primary: false,
-        name: 'remark',
-        type: 'varchar',
-        // length: 1,
-        width: 255,
-        unique: false,
-        nullable: true,
-        default: null,
-    })
-    remark: string;
-
-    @Expose()
-    @Column({
-        comment: '',
-        primary: false,
-        name: 'status',
-        type: 'tinyint',
-        // length: 1,
-        width: 1,
-        unique: false,
-        nullable: false,
-        default: 0,
-    })
-    status: number;
+    system_role_id: string;
 
     @Expose({ name: 'addMaster' })
     @Column({
@@ -127,4 +105,12 @@ export class Dict extends BaseEntity {
         default: null,
     })
     change_time: Date;
+
+    @ManyToOne(() => User, (user) => user.roles)
+    @JoinColumn({ name: 'system_user_id' })
+    user: User;
+
+    @ManyToOne(() => Role, (role) => role.users)
+    @JoinColumn({ name: 'system_role_id' })
+    role: Role;
 }
